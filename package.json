@@ -1,0 +1,19 @@
+{
+  "name": "wifi-drive",
+  "version": "1.0.0",
+  "description": "Um \"drive local\" simples que roda em Node.js + Express, permitindo compartilhar arquivos entre dispositivos conectados na mesma rede Wi-Fi.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "express": "^5.2.1",
+    "multer": "^2.1.1",
+    "qrcode": "^1.5.4"
+  }
+}

@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wi-Fi Local Drive</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --surface-color: #1e1e1e;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent-color: #bb86fc;
+            --accent-hover: #9965f4;
+            --border-radius: 8px;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background-color: var(--surface-color);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+        }
+
+        h1 {
+            margin-top: 0;
+            font-size: 1.8rem;
+            color: var(--text-primary);
+            border-bottom: 1px solid #333;
+            padding-bottom: 15px;
+        }
+
+        .upload-section {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            flex-wrap: wrap;
+        }
+
+        input[type="file"] {
+            flex-grow: 1;
+            padding: 10px;
+            background-color: var(--bg-color);
+            border: 1px solid #333;
+            border-radius: var(--border-radius);
+            color: var(--text-primary);
+            cursor: pointer;
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 10px 20px;
+            border-radius: var(--border-radius);
+            font-weight: bold;
+            cursor: pointer;
+            transition: background-color 0.2s ease;
+        }
+
+        button:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .file-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            background-color: var(--bg-color);
+            margin-bottom: 10px;
+            border-radius: var(--border-radius);
+            transition: transform 0.1s ease;
+        }
+
+        .file-item:hover {
+            transform: translateX(4px);
+        }
+
+        .file-name {
+            word-break: break-all;
+            margin-right: 15px;
+        }
+
+        .download-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            text-decoration: none;
+            padding: 6px 12px;
+            border-radius: var(--border-radius);
+            font-size: 0.9rem;
+        }
+
+        .download-btn:hover {
+            background-color: rgba(187, 134, 252, 0.1);
+        }
+
+        @media (max-width: 600px) {
+            .upload-section {
+                flex-direction: column;
+            }
+            button {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>📶 Wi-Fi Drive</h1>
+
+        <form id="uploadForm" class="upload-section">
+            <input type="file" id="fileInput" required>
+            <button type="submit">Fazer Upload</button>
+        </form>
+
+        <h2>Arquivos Disponíveis</h2>
+        <ul class="file-list" id="fileList">
+            </ul>
+    </div>
+
+    <script>
+        const fileList = document.getElementById('fileList');
+        const uploadForm = document.getElementById('uploadForm');
+        const fileInput = document.getElementById('fileInput');
+
+        async function loadFiles() {
+            try {
+                const response = await fetch('/api/files');
+                const files = await response.json();
+
+                fileList.innerHTML = '';
+
+                if (files.length === 0) {
+                    fileList.innerHTML = '<li class="file-item"><span class="file-name" style="color: var(--text-secondary);">Nenhum arquivo no momento.</span></li>';
+                    return;
+                }
+
+                files.forEach(file => {
+                    const li = document.createElement('li');
+                    li.className = 'file-item';
+
+                    const displayName = file.substring(file.indexOf('-') + 1);
+
+                    li.innerHTML = `
+                        <span class="file-name">${displayName}</span>
+                        <a href="/download/${encodeURIComponent(file)}" class="download-btn" download>Baixar</a>
+                    `;
+                    fileList.appendChild(li);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar arquivos:', error);
+            }
+        }
+
+        uploadForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const file = fileInput.files[0];
+            if (!file) return;
+
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const submitBtn = uploadForm.querySelector('button');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Enviando...';
+            submitBtn.disabled = true;
+
+            try {
+                await fetch('/api/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                uploadForm.reset();
+                await loadFiles();
+            } catch (error) {
+                alert('Erro ao fazer upload do arquivo.');
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
+        });
+
+        loadFiles();
+    </script>
+</body>
+</html>
