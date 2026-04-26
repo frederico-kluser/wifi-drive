@@ -5,3 +5,4 @@ shared/*
 *.log
 npm-debug.log*
 .env
+public/qrcode.png
