@@ -49,6 +49,152 @@
             flex-wrap: wrap;
         }
 
+        .connect-section {
+            background-color: var(--bg-color);
+            border: 1px solid #333;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .connect-section h2 {
+            margin-top: 0;
+            font-size: 1.3rem;
+            color: var(--accent-color);
+        }
+
+        .connect-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .qr-wrapper {
+            display: inline-block;
+            padding: 12px;
+            background-color: #ffffff;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .qr-wrapper img {
+            display: block;
+            width: 200px;
+            height: 200px;
+            border-radius: 4px;
+        }
+
+        .url-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .url-box span {
+            background-color: var(--surface-color);
+            padding: 8px 14px;
+            border-radius: var(--border-radius);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            border: 1px solid #333;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--accent-color);
+            color: #000;
+        }
+
+        .connect-section {
+            background-color: var(--bg-color);
+            border: 1px solid #333;
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .connect-section h2 {
+            margin-top: 0;
+            font-size: 1.3rem;
+            color: var(--accent-color);
+        }
+
+        .connect-desc {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-bottom: 15px;
+        }
+
+        .qr-wrapper {
+            display: inline-block;
+            padding: 12px;
+            background-color: #ffffff;
+            border-radius: var(--border-radius);
+            margin-bottom: 15px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+
+        .qr-wrapper img {
+            display: block;
+            width: 200px;
+            height: 200px;
+            border-radius: 4px;
+        }
+
+        .url-box {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .url-box span {
+            background-color: var(--surface-color);
+            padding: 8px 14px;
+            border-radius: var(--border-radius);
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.9rem;
+            color: var(--text-primary);
+            border: 1px solid #333;
+            word-break: break-all;
+        }
+
+        .copy-btn {
+            background-color: transparent;
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+            padding: 6px 14px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            border-radius: var(--border-radius);
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            background-color: var(--accent-color);
+            color: #000;
+        }
+
         input[type="file"] {
             flex-grow: 1;
             padding: 10px;
@@ -129,6 +275,18 @@
     <div class="container">
         <h1>📶 Wi-Fi Drive</h1>
 
+        <div class="connect-section">
+            <h2>📱 Conectar</h2>
+            <p class="connect-desc">Escaneie o QR Code com seu celular ou acesse o link abaixo:</p>
+            <div class="qr-wrapper">
+                <img id="qrCode" src="qrcode.png" alt="QR Code para acesso">
+            </div>
+            <div class="url-box">
+                <span id="driveUrl">Carregando...</span>
+                <button id="copyBtn" class="copy-btn" onclick="copyUrl()">Copiar</button>
+            </div>
+        </div>
+
         <form id="uploadForm" class="upload-section">
             <input type="file" id="fileInput" required>
             <button type="submit">Fazer Upload</button>
@@ -143,6 +301,22 @@
         const fileList = document.getElementById('fileList');
         const uploadForm = document.getElementById('uploadForm');
         const fileInput = document.getElementById('fileInput');
+        const driveUrl = document.getElementById('driveUrl');
+        const copyBtn = document.getElementById('copyBtn');
+
+        driveUrl.textContent = window.location.href;
+
+        function copyUrl() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const originalText = copyBtn.textContent;
+                copyBtn.textContent = 'Copiado!';
+                setTimeout(() => {
+                    copyBtn.textContent = originalText;
+                }, 2000);
+            }).catch(() => {
+                alert('Não foi possível copiar o link.');
+            });
+        }
 
         async function loadFiles() {
             try {
