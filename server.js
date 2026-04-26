@@ -4,10 +4,12 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const qrcode = require('qrcode');
+const { exec } = require('child_process');
 
 const app = express();
 const PORT = 3000;
 const SHARED_DIR = path.join(__dirname, 'shared');
+const QR_CODE_PATH = path.join(__dirname, 'public', 'qrcode.png');
 
 if (!fs.existsSync(SHARED_DIR)) {
     fs.mkdirSync(SHARED_DIR);
@@ -46,6 +48,23 @@ function getLocalIP() {
     return 'localhost';
 }
 
+function openBrowser(url) {
+    const platform = process.platform;
+    let command;
+    if (platform === 'win32') {
+        command = `start "" "${url}"`;
+    } else if (platform === 'darwin') {
+        command = `open "${url}"`;
+    } else {
+        command = `xdg-open "${url}"`;
+    }
+    exec(command, (err) => {
+        if (err) {
+            console.log('⚠️  Não foi possível abrir o navegador automaticamente.');
+        }
+    });
+}
+
 const ip = getLocalIP();
 const url = `http://${ip}:${PORT}`;
 
@@ -57,4 +76,14 @@ app.listen(PORT, '0.0.0.0', () => {
     qrcode.toString(url, { type: 'terminal', small: true }, (err, str) => {
         if (!err) console.log(str);
     });
+
+    qrcode.toFile(QR_CODE_PATH, url, { width: 300 }, (err) => {
+        if (err) {
+            console.log('⚠️  Erro ao gerar QR Code para a interface web:', err.message);
+        } else {
+            console.log('✅ QR Code atualizado na interface web.');
+        }
+    });
+
+    openBrowser(url);
 });
