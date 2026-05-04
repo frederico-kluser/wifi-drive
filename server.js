@@ -25,15 +25,62 @@ app.use(express.static('public'));
 app.use('/download', express.static(SHARED_DIR));
 
 app.get('/api/files', (req, res) => {
+    const offset = parseInt(req.query.offset) || 0;
+    const limit = parseInt(req.query.limit) || 20;
+    const search = (req.query.search || '').toLowerCase();
+
     fs.readdir(SHARED_DIR, (err, files) => {
         if (err) return res.status(500).json({ error: 'Erro ao ler diretório' });
-        res.json(files);
+
+        files = files.filter(f => f !== '.gitkeep');
+
+        let fileDetails = files.map(file => {
+            const filePath = path.join(SHARED_DIR, file);
+            try {
+                const stats = fs.statSync(filePath);
+                const dashIndex = file.indexOf('-');
+                const displayName = dashIndex > -1 ? file.substring(dashIndex + 1) : file;
+                return {
+                    filename: file,
+                    displayName,
+                    size: stats.size,
+                    createdAt: stats.mtimeStamp || stats.mtime.getTime(),
+                    mtime: stats.mtime
+                };
+            } catch {
+                return null;
+            }
+        }).filter(Boolean);
+
+        // Sort newest first
+        fileDetails.sort((a, b) => b.mtime - a.mtime);
+
+        if (search) {
+            fileDetails = fileDetails.filter(f =>
+                f.displayName.toLowerCase().includes(search)
+            );
+        }
+
+        const total = fileDetails.length;
+        const paginated = fileDetails.slice(offset, offset + limit).map(f => ({
+            filename: f.filename,
+            displayName: f.displayName,
+            size: f.size,
+            createdAt: f.mtime
+        }));
+
+        res.json({ files: paginated, total, hasMore: offset + limit < total });
     });
 });
 
-app.post('/api/upload', upload.single('file'), (req, res) => {
-    if (!req.file) return res.status(400).json({ error: 'Nenhum arquivo enviado' });
-    res.json({ message: 'Upload concluído com sucesso!' });
+app.post('/api/upload', upload.array('files', 50), (req, res) => {
+    if (!req.files || req.files.length === 0) {
+        return res.status(400).json({ error: 'Nenhum arquivo enviado' });
+    }
+    res.json({
+        message: `${req.files.length} arquivo(s) enviado(s) com sucesso!`,
+        count: req.files.length
+    });
 });
 
 function getLocalIP() {

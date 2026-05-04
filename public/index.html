@@ -13,6 +13,8 @@
             --accent-color: #bb86fc;
             --accent-hover: #9965f4;
             --border-radius: 8px;
+            --success-color: #4caf50;
+            --error-color: #f44336;
         }
 
         body {
@@ -42,13 +44,12 @@
             padding-bottom: 15px;
         }
 
-        .upload-section {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 30px;
-            flex-wrap: wrap;
+        h2 {
+            margin-top: 0;
+            font-size: 1.3rem;
         }
 
+        /* Connect Section */
         .connect-section {
             background-color: var(--bg-color);
             border: 1px solid #333;
@@ -59,8 +60,6 @@
         }
 
         .connect-section h2 {
-            margin-top: 0;
-            font-size: 1.3rem;
             color: var(--accent-color);
         }
 
@@ -122,102 +121,147 @@
             color: #000;
         }
 
-        .connect-section {
-            background-color: var(--bg-color);
-            border: 1px solid #333;
+        /* Upload / Drop Zone */
+        .upload-zone {
+            border: 2px dashed #444;
             border-radius: var(--border-radius);
-            padding: 20px;
-            margin-bottom: 30px;
+            padding: 40px 20px;
             text-align: center;
+            margin-bottom: 10px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
         }
 
-        .connect-section h2 {
-            margin-top: 0;
-            font-size: 1.3rem;
-            color: var(--accent-color);
+        .upload-zone:hover {
+            border-color: var(--accent-color);
+            background-color: rgba(187, 134, 252, 0.05);
         }
 
-        .connect-desc {
+        .upload-zone.dragover {
+            border-color: var(--accent-color);
+            background-color: rgba(187, 134, 252, 0.1);
+            transform: scale(1.01);
+        }
+
+        .upload-zone-icon {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .upload-zone-text {
             color: var(--text-secondary);
             font-size: 0.95rem;
-            margin-bottom: 15px;
         }
 
-        .qr-wrapper {
-            display: inline-block;
-            padding: 12px;
-            background-color: #ffffff;
-            border-radius: var(--border-radius);
-            margin-bottom: 15px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-
-        .qr-wrapper img {
-            display: block;
-            width: 200px;
-            height: 200px;
-            border-radius: 4px;
-        }
-
-        .url-box {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .url-box span {
-            background-color: var(--surface-color);
-            padding: 8px 14px;
-            border-radius: var(--border-radius);
-            font-family: 'Courier New', Courier, monospace;
-            font-size: 0.9rem;
-            color: var(--text-primary);
-            border: 1px solid #333;
-            word-break: break-all;
-        }
-
-        .copy-btn {
-            background-color: transparent;
+        .upload-zone-text strong {
             color: var(--accent-color);
-            border: 1px solid var(--accent-color);
-            padding: 6px 14px;
-            font-size: 0.85rem;
-            font-weight: 600;
+        }
+
+        .upload-zone input[type="file"] {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
             cursor: pointer;
-            border-radius: var(--border-radius);
-            transition: all 0.2s ease;
         }
 
-        .copy-btn:hover {
-            background-color: var(--accent-color);
-            color: #000;
+        /* Progress */
+        .progress-container {
+            margin-bottom: 25px;
         }
 
-        input[type="file"] {
-            flex-grow: 1;
-            padding: 10px;
+        .progress-item {
+            margin-bottom: 8px;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .progress-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 4px;
+        }
+
+        .progress-item-name {
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            max-width: 70%;
+        }
+
+        .progress-item-percent {
+            font-size: 0.8rem;
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .progress-bar-track {
+            width: 100%;
+            height: 6px;
+            background-color: #333;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent-color), var(--accent-hover));
+            border-radius: 3px;
+            transition: width 0.2s ease;
+            width: 0%;
+        }
+
+        .progress-bar-fill.complete {
+            background: linear-gradient(90deg, var(--success-color), #66bb6a);
+        }
+
+        .progress-bar-fill.error {
+            background: linear-gradient(90deg, var(--error-color), #e57373);
+        }
+
+        /* Search */
+        .search-section {
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 16px;
             background-color: var(--bg-color);
             border: 1px solid #333;
             border-radius: var(--border-radius);
             color: var(--text-primary);
-            cursor: pointer;
+            font-size: 0.95rem;
+            box-sizing: border-box;
+            transition: border-color 0.2s ease;
         }
 
-        button {
-            background-color: var(--accent-color);
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: var(--border-radius);
-            font-weight: bold;
-            cursor: pointer;
-            transition: background-color 0.2s ease;
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
         }
 
-        button:hover {
-            background-color: var(--accent-hover);
+        .search-input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        /* File List */
+        .files-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .files-header h2 {
+            margin: 0;
+        }
+
+        .files-count {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
         }
 
         .file-list {
@@ -228,22 +272,42 @@
 
         .file-item {
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 15px;
+            padding: 14px 16px;
             background-color: var(--bg-color);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             border-radius: var(--border-radius);
-            transition: transform 0.1s ease;
+            transition: transform 0.1s ease, opacity 0.3s ease;
+            animation: slideIn 0.3s ease;
+            gap: 12px;
         }
 
         .file-item:hover {
             transform: translateX(4px);
         }
 
+        .file-icon {
+            font-size: 1.5rem;
+            min-width: 36px;
+            text-align: center;
+        }
+
+        .file-info {
+            flex: 1;
+            min-width: 0;
+        }
+
         .file-name {
             word-break: break-all;
-            margin-right: 15px;
+            font-size: 0.95rem;
+            margin-bottom: 4px;
+        }
+
+        .file-meta {
+            display: flex;
+            gap: 12px;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
         }
 
         .download-btn {
@@ -253,19 +317,79 @@
             text-decoration: none;
             padding: 6px 12px;
             border-radius: var(--border-radius);
-            font-size: 0.9rem;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            transition: all 0.2s ease;
         }
 
         .download-btn:hover {
             background-color: rgba(187, 134, 252, 0.1);
         }
 
+        /* Loading Spinner */
+        .loading-indicator {
+            text-align: center;
+            padding: 20px;
+            color: var(--text-secondary);
+            display: none;
+        }
+
+        .loading-indicator.visible {
+            display: block;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #333;
+            border-top-color: var(--accent-color);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
         @media (max-width: 600px) {
-            .upload-section {
-                flex-direction: column;
+            .container {
+                padding: 20px 15px;
             }
-            button {
-                width: 100%;
+
+            .upload-zone {
+                padding: 30px 15px;
+            }
+
+            .file-item {
+                padding: 12px;
+            }
+
+            .file-meta {
+                flex-wrap: wrap;
+                gap: 6px;
             }
         }
     </style>
@@ -287,96 +411,288 @@
             </div>
         </div>
 
-        <form id="uploadForm" class="upload-section">
-            <input type="file" id="fileInput" required>
-            <button type="submit">Fazer Upload</button>
-        </form>
+        <!-- Upload Zone -->
+        <div class="upload-zone" id="dropZone">
+            <div class="upload-zone-icon">📁</div>
+            <div class="upload-zone-text">
+                Arraste arquivos aqui ou <strong>clique para selecionar</strong>
+            </div>
+            <input type="file" id="fileInput" multiple>
+        </div>
 
-        <h2>Arquivos Disponíveis</h2>
-        <ul class="file-list" id="fileList">
-            </ul>
+        <!-- Progress Bars -->
+        <div class="progress-container" id="progressContainer"></div>
+
+        <!-- Search -->
+        <div class="search-section">
+            <input type="text" class="search-input" id="searchInput" placeholder="🔍 Buscar arquivo por nome...">
+        </div>
+
+        <!-- File List -->
+        <div class="files-header">
+            <h2>Arquivos Disponíveis</h2>
+            <span class="files-count" id="filesCount"></span>
+        </div>
+        <ul class="file-list" id="fileList"></ul>
+        <div class="loading-indicator" id="loadingIndicator">
+            <div class="spinner"></div>
+            <p>Carregando mais arquivos...</p>
+        </div>
     </div>
 
     <script>
         const fileList = document.getElementById('fileList');
-        const uploadForm = document.getElementById('uploadForm');
         const fileInput = document.getElementById('fileInput');
+        const dropZone = document.getElementById('dropZone');
+        const progressContainer = document.getElementById('progressContainer');
+        const searchInput = document.getElementById('searchInput');
+        const filesCount = document.getElementById('filesCount');
+        const loadingIndicator = document.getElementById('loadingIndicator');
         const driveUrl = document.getElementById('driveUrl');
         const copyBtn = document.getElementById('copyBtn');
 
+        let currentOffset = 0;
+        const PAGE_SIZE = 20;
+        let isLoading = false;
+        let hasMore = true;
+        let searchTerm = '';
+        let searchTimeout = null;
+        let totalFiles = 0;
+
         driveUrl.textContent = window.location.href;
+
+        // --- Utility Functions ---
 
         function copyUrl() {
             navigator.clipboard.writeText(window.location.href).then(() => {
                 const originalText = copyBtn.textContent;
                 copyBtn.textContent = 'Copiado!';
-                setTimeout(() => {
-                    copyBtn.textContent = originalText;
-                }, 2000);
-            }).catch(() => {
-                alert('Não foi possível copiar o link.');
-            });
+                setTimeout(() => { copyBtn.textContent = originalText; }, 2000);
+            }).catch(() => alert('Não foi possível copiar o link.'));
         }
 
-        async function loadFiles() {
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMin = Math.floor(diffMs / 60000);
+            const diffHrs = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMin < 1) return 'agora';
+            if (diffMin < 60) return `há ${diffMin} min`;
+            if (diffHrs < 24) return `há ${diffHrs}h`;
+            if (diffDays === 1) return 'ontem';
+            if (diffDays < 7) return `há ${diffDays} dias`;
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                pdf: '📄', doc: '📝', docx: '📝', txt: '📝', rtf: '📝',
+                xls: '📊', xlsx: '📊', csv: '📊',
+                ppt: '📽️', pptx: '📽️',
+                jpg: '🖼️', jpeg: '🖼️', png: '🖼️', gif: '🖼️', webp: '🖼️', svg: '🖼️', bmp: '🖼️',
+                mp4: '🎬', mov: '🎬', avi: '🎬', mkv: '🎬', webm: '🎬', flv: '🎬',
+                mp3: '🎵', wav: '🎵', flac: '🎵', ogg: '🎵', aac: '🎵',
+                zip: '📦', rar: '📦', '7z': '📦', tar: '📦', gz: '📦',
+                js: '💻', ts: '💻', py: '💻', java: '💻', html: '💻', css: '💻',
+                exe: '⚙️', dmg: '⚙️', apk: '⚙️',
+            };
+            return icons[ext] || '📎';
+        }
+
+        // --- Upload Logic ---
+
+        function handleFiles(files) {
+            if (!files || files.length === 0) return;
+            Array.from(files).forEach(file => uploadFile(file));
+        }
+
+        function uploadFile(file) {
+            const id = 'upload-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+
+            const progressItem = document.createElement('div');
+            progressItem.className = 'progress-item';
+            progressItem.id = id;
+            progressItem.innerHTML = `
+                <div class="progress-item-header">
+                    <span class="progress-item-name">${file.name}</span>
+                    <span class="progress-item-percent">0%</span>
+                </div>
+                <div class="progress-bar-track">
+                    <div class="progress-bar-fill"></div>
+                </div>
+            `;
+            progressContainer.appendChild(progressItem);
+
+            const formData = new FormData();
+            formData.append('files', file);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/upload');
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const pct = Math.round((e.loaded / e.total) * 100);
+                    const fill = progressItem.querySelector('.progress-bar-fill');
+                    const percentLabel = progressItem.querySelector('.progress-item-percent');
+                    fill.style.width = pct + '%';
+                    percentLabel.textContent = pct + '%';
+                }
+            };
+
+            xhr.onload = () => {
+                const fill = progressItem.querySelector('.progress-bar-fill');
+                const percentLabel = progressItem.querySelector('.progress-item-percent');
+                if (xhr.status === 200) {
+                    fill.style.width = '100%';
+                    fill.classList.add('complete');
+                    percentLabel.textContent = '✓';
+                    setTimeout(() => {
+                        progressItem.style.opacity = '0';
+                        setTimeout(() => progressItem.remove(), 300);
+                    }, 2000);
+                    resetAndLoadFiles();
+                } else {
+                    fill.classList.add('error');
+                    percentLabel.textContent = 'Erro';
+                    setTimeout(() => progressItem.remove(), 5000);
+                }
+            };
+
+            xhr.onerror = () => {
+                const fill = progressItem.querySelector('.progress-bar-fill');
+                const percentLabel = progressItem.querySelector('.progress-item-percent');
+                fill.classList.add('error');
+                percentLabel.textContent = 'Erro';
+                setTimeout(() => progressItem.remove(), 5000);
+            };
+
+            xhr.send(formData);
+        }
+
+        // File input change
+        fileInput.addEventListener('change', () => {
+            handleFiles(fileInput.files);
+            fileInput.value = '';
+        });
+
+        // Drag and drop
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.classList.add('dragover');
+        });
+
+        dropZone.addEventListener('dragleave', () => {
+            dropZone.classList.remove('dragover');
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('dragover');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // --- File List with Scroll Infinito ---
+
+        async function loadFiles(append = false) {
+            if (isLoading) return;
+            if (!append && !hasMore && currentOffset > 0) return;
+
+            isLoading = true;
+            loadingIndicator.classList.add('visible');
+
             try {
-                const response = await fetch('/api/files');
-                const files = await response.json();
+                const params = new URLSearchParams({
+                    offset: currentOffset,
+                    limit: PAGE_SIZE,
+                });
+                if (searchTerm) params.set('search', searchTerm);
 
-                fileList.innerHTML = '';
+                const response = await fetch('/api/files?' + params.toString());
+                const data = await response.json();
 
-                if (files.length === 0) {
-                    fileList.innerHTML = '<li class="file-item"><span class="file-name" style="color: var(--text-secondary);">Nenhum arquivo no momento.</span></li>';
+                if (!append) {
+                    fileList.innerHTML = '';
+                }
+
+                totalFiles = data.total;
+                hasMore = data.hasMore;
+                filesCount.textContent = `${totalFiles} arquivo(s)`;
+
+                if (data.files.length === 0 && currentOffset === 0) {
+                    fileList.innerHTML = `
+                        <li class="empty-state">
+                            <div class="empty-state-icon">📂</div>
+                            <p>${searchTerm ? 'Nenhum arquivo encontrado.' : 'Nenhum arquivo no momento.'}</p>
+                        </li>
+                    `;
                     return;
                 }
 
-                files.forEach(file => {
+                data.files.forEach(file => {
                     const li = document.createElement('li');
                     li.className = 'file-item';
-
-                    const displayName = file.substring(file.indexOf('-') + 1);
-
                     li.innerHTML = `
-                        <span class="file-name">${displayName}</span>
-                        <a href="/download/${encodeURIComponent(file)}" class="download-btn" download>Baixar</a>
+                        <div class="file-icon">${getFileIcon(file.displayName)}</div>
+                        <div class="file-info">
+                            <div class="file-name">${file.displayName}</div>
+                            <div class="file-meta">
+                                <span>${formatFileSize(file.size)}</span>
+                                <span>${formatDate(file.createdAt)}</span>
+                            </div>
+                        </div>
+                        <a href="/download/${encodeURIComponent(file.filename)}" class="download-btn" download>Baixar</a>
                     `;
                     fileList.appendChild(li);
                 });
+
+                currentOffset += data.files.length;
             } catch (error) {
                 console.error('Erro ao carregar arquivos:', error);
+            } finally {
+                isLoading = false;
+                loadingIndicator.classList.remove('visible');
             }
         }
 
-        uploadForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
+        function resetAndLoadFiles() {
+            currentOffset = 0;
+            hasMore = true;
+            loadFiles(false);
+        }
 
-            const file = fileInput.files[0];
-            if (!file) return;
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const submitBtn = uploadForm.querySelector('button');
-            const originalText = submitBtn.textContent;
-            submitBtn.textContent = 'Enviando...';
-            submitBtn.disabled = true;
-
-            try {
-                await fetch('/api/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                uploadForm.reset();
-                await loadFiles();
-            } catch (error) {
-                alert('Erro ao fazer upload do arquivo.');
-            } finally {
-                submitBtn.textContent = originalText;
-                submitBtn.disabled = false;
+        // Infinite scroll with IntersectionObserver
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && hasMore && !isLoading) {
+                loadFiles(true);
             }
+        }, { rootMargin: '200px' });
+
+        observer.observe(loadingIndicator);
+
+        // --- Search ---
+
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchTerm = searchInput.value.trim();
+                currentOffset = 0;
+                hasMore = true;
+                loadFiles(false);
+            }, 300);
         });
 
+        // --- Init ---
         loadFiles();
     </script>
 </body>
