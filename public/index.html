@@ -23,7 +23,7 @@
             --radius: 4px;
         }
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
+        * { margin: 0; padding: 0; box-sizing: border-box; user-select: none; }
 
         body {
             font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
@@ -671,8 +671,11 @@
     <!-- Context Menu -->
     <div class="context-menu" id="contextMenu">
         <div class="context-menu-item" id="ctxDownload">⬇ Baixar</div>
+        <div class="context-menu-item" id="ctxDownloadZip">📦 Baixar como ZIP</div>
         <div class="context-menu-separator"></div>
         <div class="context-menu-item" id="ctxCopyName">📋 Copiar nome</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" id="ctxDelete" style="color: var(--error-color);">🗑 Excluir</div>
     </div>
 
     <!-- Hidden input -->
@@ -701,7 +704,9 @@
         let totalFiles = 0;
         let currentView = 'grid';
         let currentSort = 'date-desc';
-        let selectedFile = null;
+        let selectedFiles = [];
+        let lastClickedIndex = -1;
+        let allLoadedFiles = [];
 
         qrUrl.textContent = window.location.href;
 
@@ -799,31 +804,137 @@
             if (!e.target.closest('.context-menu') && !e.target.closest('.file-card')) {
                 contextMenu.classList.remove('visible');
             }
+            // Deselect all when clicking empty area
+            if (!e.target.closest('.file-card') && !e.target.closest('.context-menu') && !e.target.closest('.toolbar')) {
+                selectedFiles = [];
+                updateSelectionUI();
+            }
         });
 
-        // --- Context Menu ---
+        // --- Multi-Select & Context Menu ---
+
+        function getSelectedFilenames() {
+            return selectedFiles.map(f => f.filename);
+        }
+
+        function updateSelectionUI() {
+            fileGrid.querySelectorAll('.file-card').forEach((card, i) => {
+                const file = allLoadedFiles[i];
+                if (file && selectedFiles.some(sf => sf.filename === file.filename)) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+            const count = selectedFiles.length;
+            statusCount.textContent = count > 0
+                ? `${count} selecionado${count > 1 ? 's' : ''} de ${totalFiles}`
+                : `${totalFiles} item${totalFiles !== 1 ? 's' : ''}`;
+        }
+
+        function handleCardClick(e, file, index) {
+            if (e.ctrlKey || e.metaKey) {
+                // Toggle selection
+                const idx = selectedFiles.findIndex(f => f.filename === file.filename);
+                if (idx > -1) selectedFiles.splice(idx, 1);
+                else selectedFiles.push(file);
+                lastClickedIndex = index;
+            } else if (e.shiftKey && lastClickedIndex > -1) {
+                // Range selection
+                const start = Math.min(lastClickedIndex, index);
+                const end = Math.max(lastClickedIndex, index);
+                const range = allLoadedFiles.slice(start, end + 1);
+                // Merge with existing
+                range.forEach(f => {
+                    if (!selectedFiles.some(sf => sf.filename === f.filename)) {
+                        selectedFiles.push(f);
+                    }
+                });
+            } else {
+                // Single select
+                selectedFiles = [file];
+                lastClickedIndex = index;
+            }
+            updateSelectionUI();
+        }
 
         function showContextMenu(e, file) {
             e.preventDefault();
-            selectedFile = file;
-            contextMenu.style.left = e.clientX + 'px';
-            contextMenu.style.top = e.clientY + 'px';
+            // If right-clicked file is not in selection, select only it
+            if (!selectedFiles.some(sf => sf.filename === file.filename)) {
+                selectedFiles = [file];
+                updateSelectionUI();
+            }
+            contextMenu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
+            contextMenu.style.top = Math.min(e.clientY, window.innerHeight - 160) + 'px';
             contextMenu.classList.add('visible');
+
+            // Show/hide items based on selection count
+            const count = selectedFiles.length;
+            document.getElementById('ctxDownload').style.display = count === 1 ? '' : 'none';
+            document.getElementById('ctxCopyName').style.display = count === 1 ? '' : 'none';
+            document.getElementById('ctxDownloadZip').textContent = count > 1
+                ? `📦 Baixar ${count} arquivos como ZIP`
+                : '📦 Baixar como ZIP';
+            document.getElementById('ctxDelete').textContent = count > 1
+                ? `🗑 Excluir ${count} arquivos`
+                : '🗑 Excluir';
         }
 
         document.getElementById('ctxDownload').onclick = () => {
-            if (selectedFile) {
+            if (selectedFiles.length === 1) {
                 const a = document.createElement('a');
-                a.href = '/download/' + encodeURIComponent(selectedFile.filename);
-                a.download = selectedFile.displayName;
+                a.href = '/download/' + encodeURIComponent(selectedFiles[0].filename);
+                a.download = selectedFiles[0].displayName;
                 a.click();
             }
             contextMenu.classList.remove('visible');
         };
 
-        document.getElementById('ctxCopyName').onclick = () => {
-            if (selectedFile) navigator.clipboard.writeText(selectedFile.displayName);
+        document.getElementById('ctxDownloadZip').onclick = async () => {
             contextMenu.classList.remove('visible');
+            const filenames = getSelectedFilenames();
+            try {
+                const response = await fetch('/api/download-zip', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: filenames })
+                });
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'wifi-drive-files.zip';
+                a.click();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                console.error('Erro ao baixar ZIP:', err);
+            }
+        };
+
+        document.getElementById('ctxCopyName').onclick = () => {
+            if (selectedFiles.length === 1) {
+                navigator.clipboard.writeText(selectedFiles[0].displayName);
+            }
+            contextMenu.classList.remove('visible');
+        };
+
+        document.getElementById('ctxDelete').onclick = async () => {
+            contextMenu.classList.remove('visible');
+            const count = selectedFiles.length;
+            if (!confirm(`Excluir ${count} arquivo${count > 1 ? 's' : ''}? Esta ação não pode ser desfeita.`)) return;
+
+            try {
+                await fetch('/api/delete', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ files: getSelectedFilenames() })
+                });
+                selectedFiles = [];
+                resetAndLoadFiles();
+            } catch (err) {
+                console.error('Erro ao excluir:', err);
+            }
         };
 
         // --- Upload ---
@@ -928,7 +1039,10 @@
                 const response = await fetch('/api/files?' + params.toString());
                 const data = await response.json();
 
-                if (!append) fileGrid.innerHTML = '';
+                if (!append) {
+                    fileGrid.innerHTML = '';
+                    allLoadedFiles = [];
+                }
 
                 totalFiles = data.total;
                 hasMore = data.hasMore;
@@ -945,8 +1059,14 @@
                 }
 
                 data.files.forEach(file => {
+                    const index = allLoadedFiles.length;
+                    allLoadedFiles.push(file);
+
                     const card = document.createElement('div');
                     card.className = 'file-card';
+                    if (selectedFiles.some(sf => sf.filename === file.filename)) {
+                        card.classList.add('selected');
+                    }
                     card.innerHTML = `
                         <div class="file-card-icon">${getFileIcon(file.displayName)}</div>
                         <div class="file-card-name" title="${file.displayName}">${file.displayName}</div>
@@ -964,11 +1084,7 @@
                     });
 
                     card.addEventListener('contextmenu', (e) => showContextMenu(e, file));
-
-                    card.addEventListener('click', () => {
-                        fileGrid.querySelectorAll('.file-card.selected').forEach(c => c.classList.remove('selected'));
-                        card.classList.add('selected');
-                    });
+                    card.addEventListener('click', (e) => handleCardClick(e, file, index));
 
                     fileGrid.appendChild(card);
                 });

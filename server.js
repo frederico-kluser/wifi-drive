@@ -4,6 +4,7 @@ const fs = require('fs');
 const path = require('path');
 const os = require('os');
 const qrcode = require('qrcode');
+const archiver = require('archiver');
 const { exec } = require('child_process');
 
 const app = express();
@@ -99,6 +100,57 @@ app.post('/api/upload', upload.array('files', 50), (req, res) => {
         message: `${req.files.length} arquivo(s) enviado(s) com sucesso!`,
         count: req.files.length
     });
+});
+
+app.use(express.json());
+
+app.post('/api/delete', (req, res) => {
+    const { files: filenames } = req.body;
+    if (!filenames || !Array.isArray(filenames) || filenames.length === 0) {
+        return res.status(400).json({ error: 'Nenhum arquivo especificado' });
+    }
+
+    let deleted = 0;
+    let errors = [];
+    filenames.forEach(filename => {
+        const sanitized = path.basename(filename);
+        const filePath = path.join(SHARED_DIR, sanitized);
+        try {
+            if (fs.existsSync(filePath)) {
+                fs.unlinkSync(filePath);
+                deleted++;
+            }
+        } catch (err) {
+            errors.push(sanitized);
+        }
+    });
+
+    res.json({ deleted, errors });
+});
+
+app.post('/api/download-zip', (req, res) => {
+    const { files: filenames } = req.body;
+    if (!filenames || !Array.isArray(filenames) || filenames.length === 0) {
+        return res.status(400).json({ error: 'Nenhum arquivo especificado' });
+    }
+
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="wifi-drive-files.zip"');
+
+    const archive = archiver('zip', { zlib: { level: 5 } });
+    archive.pipe(res);
+
+    filenames.forEach(filename => {
+        const sanitized = path.basename(filename);
+        const filePath = path.join(SHARED_DIR, sanitized);
+        if (fs.existsSync(filePath)) {
+            const dashIndex = sanitized.indexOf('-');
+            const displayName = dashIndex > -1 ? sanitized.substring(dashIndex + 1) : sanitized;
+            archive.file(filePath, { name: displayName });
+        }
+    });
+
+    archive.finalize();
 });
 
 function getLocalIP() {
