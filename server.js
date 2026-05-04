@@ -28,6 +28,7 @@ app.get('/api/files', (req, res) => {
     const offset = parseInt(req.query.offset) || 0;
     const limit = parseInt(req.query.limit) || 20;
     const search = (req.query.search || '').toLowerCase();
+    const sort = req.query.sort || 'date-desc';
 
     fs.readdir(SHARED_DIR, (err, files) => {
         if (err) return res.status(500).json({ error: 'Erro ao ler diretório' });
@@ -44,7 +45,6 @@ app.get('/api/files', (req, res) => {
                     filename: file,
                     displayName,
                     size: stats.size,
-                    createdAt: stats.mtimeStamp || stats.mtime.getTime(),
                     mtime: stats.mtime
                 };
             } catch {
@@ -52,8 +52,26 @@ app.get('/api/files', (req, res) => {
             }
         }).filter(Boolean);
 
-        // Sort newest first
-        fileDetails.sort((a, b) => b.mtime - a.mtime);
+        // Sort
+        switch (sort) {
+            case 'date-asc':
+                fileDetails.sort((a, b) => a.mtime - b.mtime);
+                break;
+            case 'name-asc':
+                fileDetails.sort((a, b) => a.displayName.localeCompare(b.displayName));
+                break;
+            case 'name-desc':
+                fileDetails.sort((a, b) => b.displayName.localeCompare(a.displayName));
+                break;
+            case 'size-desc':
+                fileDetails.sort((a, b) => b.size - a.size);
+                break;
+            case 'size-asc':
+                fileDetails.sort((a, b) => a.size - b.size);
+                break;
+            default: // date-desc
+                fileDetails.sort((a, b) => b.mtime - a.mtime);
+        }
 
         if (search) {
             fileDetails = fileDetails.filter(f =>

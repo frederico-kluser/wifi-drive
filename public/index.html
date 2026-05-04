@@ -3,7 +3,1016 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wi-Fi Local Drive</title>
+    <title>Wi-Fi Drive</title>
+    <style>
+        :root {
+            --bg-color: #1e1e1e;
+            --surface-color: #252526;
+            --sidebar-color: #2d2d30;
+            --toolbar-color: #333333;
+            --text-primary: #e0e0e0;
+            --text-secondary: #a0a0a0;
+            --accent-color: #0078d4;
+            --accent-hover: #1a8adf;
+            --accent-light: rgba(0, 120, 212, 0.15);
+            --border-color: #3e3e42;
+            --hover-bg: #2a2d2e;
+            --selected-bg: #094771;
+            --success-color: #4caf50;
+            --error-color: #f44336;
+            --radius: 4px;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Toolbar */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            background-color: var(--toolbar-color);
+            border-bottom: 1px solid var(--border-color);
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        .toolbar-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-right: 16px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .toolbar-btn {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.15s;
+        }
+
+        .toolbar-btn:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+
+        .toolbar-btn.active {
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .toolbar-separator {
+            width: 1px;
+            height: 20px;
+            background-color: var(--border-color);
+            margin: 0 4px;
+        }
+
+        .toolbar-search {
+            margin-left: auto;
+            position: relative;
+        }
+
+        .toolbar-search input {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            padding: 5px 10px 5px 28px;
+            font-size: 0.8rem;
+            width: 200px;
+            transition: border-color 0.2s, width 0.2s;
+        }
+
+        .toolbar-search input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            width: 260px;
+        }
+
+        .toolbar-search::before {
+            content: '🔍';
+            position: absolute;
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.7rem;
+        }
+
+        /* Sort dropdown */
+        .sort-dropdown {
+            position: relative;
+        }
+
+        .sort-menu {
+            display: none;
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background-color: var(--sidebar-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            z-index: 100;
+            min-width: 160px;
+            padding: 4px 0;
+        }
+
+        .sort-menu.visible { display: block; }
+
+        .sort-menu-item {
+            padding: 6px 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+        }
+
+        .sort-menu-item:hover { background-color: var(--hover-bg); }
+        .sort-menu-item.active { color: var(--accent-color); }
+        .sort-menu-item .check { width: 14px; font-size: 0.7rem; }
+
+        /* Main content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Path bar */
+        .path-bar {
+            display: flex;
+            align-items: center;
+            padding: 6px 12px;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.8rem;
+            gap: 4px;
+            flex-shrink: 0;
+        }
+
+        .path-segment {
+            color: var(--text-secondary);
+            padding: 2px 6px;
+            border-radius: var(--radius);
+            cursor: default;
+        }
+
+        .path-separator { color: var(--text-secondary); font-size: 0.7rem; }
+
+        .path-segment.current { color: var(--text-primary); }
+
+        /* Status bar */
+        .status-bar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 4px 12px;
+            background-color: var(--toolbar-color);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
+        .status-left { display: flex; gap: 16px; }
+
+        /* File grid */
+        .file-area {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px;
+        }
+
+        .file-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 8px;
+        }
+
+        .file-grid.list-view {
+            grid-template-columns: 1fr;
+            gap: 2px;
+        }
+
+        .file-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 12px 8px;
+            border-radius: var(--radius);
+            cursor: pointer;
+            transition: background-color 0.1s;
+            text-align: center;
+            position: relative;
+        }
+
+        .file-card:hover { background-color: var(--hover-bg); }
+        .file-card.selected { background-color: var(--selected-bg); }
+
+        .file-card-icon {
+            font-size: 2.8rem;
+            margin-bottom: 6px;
+            line-height: 1;
+        }
+
+        .file-card-name {
+            font-size: 0.75rem;
+            word-break: break-word;
+            line-height: 1.3;
+            max-height: 2.6em;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            width: 100%;
+        }
+
+        /* List view */
+        .file-grid.list-view .file-card {
+            flex-direction: row;
+            text-align: left;
+            padding: 6px 12px;
+            gap: 10px;
+        }
+
+        .file-grid.list-view .file-card-icon {
+            font-size: 1.2rem;
+            margin-bottom: 0;
+            min-width: 24px;
+        }
+
+        .file-grid.list-view .file-card-name {
+            flex: 1;
+            max-height: none;
+            -webkit-line-clamp: 1;
+            font-size: 0.82rem;
+        }
+
+        .file-card-meta {
+            display: none;
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            gap: 20px;
+        }
+
+        .file-grid.list-view .file-card-meta {
+            display: flex;
+        }
+
+        .file-card-meta span {
+            min-width: 80px;
+        }
+
+        /* Upload drop overlay */
+        .drop-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0, 120, 212, 0.12);
+            border: 3px dashed var(--accent-color);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .drop-overlay.visible {
+            display: flex;
+        }
+
+        .drop-overlay-text {
+            font-size: 1.2rem;
+            color: var(--accent-color);
+            font-weight: 600;
+        }
+
+        .drop-overlay-icon { font-size: 3rem; }
+
+        /* Progress container */
+        .progress-container {
+            padding: 0 12px;
+            flex-shrink: 0;
+        }
+
+        .progress-container:empty { display: none; }
+
+        .progress-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px 0;
+            animation: fadeIn 0.2s;
+        }
+
+        .progress-item-name {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            min-width: 100px;
+            max-width: 200px;
+        }
+
+        .progress-bar-track {
+            flex: 1;
+            height: 4px;
+            background-color: #3e3e42;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+
+        .progress-bar-fill {
+            height: 100%;
+            background-color: var(--accent-color);
+            border-radius: 2px;
+            transition: width 0.2s;
+            width: 0%;
+        }
+
+        .progress-bar-fill.complete { background-color: var(--success-color); }
+        .progress-bar-fill.error { background-color: var(--error-color); }
+
+        .progress-item-percent {
+            font-size: 0.72rem;
+            color: var(--accent-color);
+            min-width: 32px;
+            text-align: right;
+        }
+
+        /* QR Modal */
+        .qr-fab {
+            position: fixed;
+            bottom: 40px;
+            right: 20px;
+            width: 48px;
+            height: 48px;
+            background-color: var(--accent-color);
+            border: none;
+            border-radius: 50%;
+            color: #fff;
+            font-size: 1.3rem;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 50;
+            transition: transform 0.2s, background-color 0.2s;
+        }
+
+        .qr-fab:hover {
+            transform: scale(1.1);
+            background-color: var(--accent-hover);
+        }
+
+        .qr-modal-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 200;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .qr-modal-backdrop.visible { display: flex; }
+
+        .qr-modal {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 24px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            max-width: 320px;
+            width: 90%;
+        }
+
+        .qr-modal h3 {
+            margin-bottom: 12px;
+            font-size: 1rem;
+            color: var(--text-primary);
+        }
+
+        .qr-modal-img {
+            background: #fff;
+            padding: 12px;
+            border-radius: 6px;
+            display: inline-block;
+            margin-bottom: 12px;
+        }
+
+        .qr-modal-img img {
+            width: 180px;
+            height: 180px;
+            display: block;
+        }
+
+        .qr-modal-url {
+            font-family: 'Courier New', monospace;
+            font-size: 0.8rem;
+            color: var(--text-secondary);
+            background-color: var(--bg-color);
+            padding: 8px 12px;
+            border-radius: var(--radius);
+            word-break: break-all;
+            margin-bottom: 12px;
+        }
+
+        .qr-modal-actions {
+            display: flex;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .qr-modal-btn {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 7px 16px;
+            border-radius: var(--radius);
+            font-size: 0.8rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .qr-modal-btn:hover { background-color: var(--accent-hover); }
+
+        .qr-modal-btn.secondary {
+            background-color: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-primary);
+        }
+
+        .qr-modal-btn.secondary:hover { background-color: var(--hover-bg); }
+
+        /* Context Menu */
+        .context-menu {
+            display: none;
+            position: fixed;
+            background-color: var(--sidebar-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5);
+            z-index: 300;
+            min-width: 160px;
+            padding: 4px 0;
+        }
+
+        .context-menu.visible { display: block; }
+
+        .context-menu-item {
+            padding: 6px 14px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+        }
+
+        .context-menu-item:hover { background-color: var(--hover-bg); }
+
+        .context-menu-separator {
+            height: 1px;
+            background-color: var(--border-color);
+            margin: 4px 0;
+        }
+
+        /* Empty state */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 60px 20px;
+            color: var(--text-secondary);
+        }
+
+        .empty-state-icon { font-size: 3rem; margin-bottom: 12px; opacity: 0.5; }
+        .empty-state-text { font-size: 0.9rem; }
+
+        /* Loading */
+        .loading-indicator {
+            text-align: center;
+            padding: 16px;
+            color: var(--text-secondary);
+            font-size: 0.8rem;
+            display: none;
+        }
+
+        .loading-indicator.visible { display: block; }
+
+        /* Upload button in toolbar */
+        .upload-btn {
+            background-color: var(--accent-color);
+            color: #fff;
+            border: none;
+            padding: 5px 12px;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-weight: 500;
+            transition: background-color 0.15s;
+        }
+
+        .upload-btn:hover { background-color: var(--accent-hover); }
+
+        /* Hidden file input */
+        #fileInput { display: none; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @media (max-width: 600px) {
+            .toolbar-search input { width: 130px; }
+            .toolbar-search input:focus { width: 160px; }
+            .file-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
+            .toolbar-title span { display: none; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+        <div class="toolbar-title">📶 <span>Wi-Fi Drive</span></div>
+
+        <button class="upload-btn" onclick="fileInput.click()">
+            ⬆ Upload
+        </button>
+
+        <div class="toolbar-separator"></div>
+
+        <button class="toolbar-btn" id="viewGrid" title="Visualização em Grade" onclick="setView('grid')">
+            ▦ Grade
+        </button>
+        <button class="toolbar-btn" id="viewList" title="Visualização em Lista" onclick="setView('list')">
+            ☰ Lista
+        </button>
+
+        <div class="toolbar-separator"></div>
+
+        <div class="sort-dropdown">
+            <button class="toolbar-btn" id="sortBtn" onclick="toggleSortMenu()">
+                ↕ Ordenar
+            </button>
+            <div class="sort-menu" id="sortMenu">
+                <div class="sort-menu-item active" data-sort="date-desc" onclick="setSort('date-desc')">
+                    <span class="check">✓</span> Mais recente primeiro
+                </div>
+                <div class="sort-menu-item" data-sort="date-asc" onclick="setSort('date-asc')">
+                    <span class="check"></span> Mais antigo primeiro
+                </div>
+                <div class="sort-menu-item" data-sort="name-asc" onclick="setSort('name-asc')">
+                    <span class="check"></span> Nome (A-Z)
+                </div>
+                <div class="sort-menu-item" data-sort="name-desc" onclick="setSort('name-desc')">
+                    <span class="check"></span> Nome (Z-A)
+                </div>
+                <div class="sort-menu-item" data-sort="size-desc" onclick="setSort('size-desc')">
+                    <span class="check"></span> Maior tamanho
+                </div>
+                <div class="sort-menu-item" data-sort="size-asc" onclick="setSort('size-asc')">
+                    <span class="check"></span> Menor tamanho
+                </div>
+            </div>
+        </div>
+
+        <div class="toolbar-search">
+            <input type="text" id="searchInput" placeholder="Buscar arquivos...">
+        </div>
+    </div>
+
+    <!-- Path bar -->
+    <div class="path-bar">
+        <span class="path-segment">📶 Wi-Fi Drive</span>
+        <span class="path-separator">›</span>
+        <span class="path-segment current">Compartilhados</span>
+    </div>
+
+    <!-- Progress -->
+    <div class="progress-container" id="progressContainer"></div>
+
+    <!-- File area -->
+    <div class="file-area" id="fileArea">
+        <div class="file-grid" id="fileGrid"></div>
+        <div class="loading-indicator" id="loadingIndicator">Carregando...</div>
+    </div>
+
+    <!-- Status bar -->
+    <div class="status-bar">
+        <div class="status-left">
+            <span id="statusCount">0 itens</span>
+            <span id="statusSize"></span>
+        </div>
+        <span id="statusView">Grade</span>
+    </div>
+
+    <!-- Drop overlay -->
+    <div class="drop-overlay" id="dropOverlay">
+        <div class="drop-overlay-icon">📂</div>
+        <div class="drop-overlay-text">Solte os arquivos para enviar</div>
+    </div>
+
+    <!-- QR FAB -->
+    <button class="qr-fab" id="qrFab" onclick="openQrModal()" title="Mostrar QR Code">
+        📱
+    </button>
+
+    <!-- QR Modal -->
+    <div class="qr-modal-backdrop" id="qrBackdrop" onclick="closeQrModal(event)">
+        <div class="qr-modal">
+            <h3>📱 Conectar outro dispositivo</h3>
+            <div class="qr-modal-img">
+                <img src="qrcode.png" alt="QR Code">
+            </div>
+            <div class="qr-modal-url" id="qrUrl"></div>
+            <div class="qr-modal-actions">
+                <button class="qr-modal-btn" onclick="copyUrl()">Copiar Link</button>
+                <button class="qr-modal-btn secondary" onclick="closeQrModal()">Fechar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Context Menu -->
+    <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" id="ctxDownload">⬇ Baixar</div>
+        <div class="context-menu-separator"></div>
+        <div class="context-menu-item" id="ctxCopyName">📋 Copiar nome</div>
+    </div>
+
+    <!-- Hidden input -->
+    <input type="file" id="fileInput" multiple>
+
+    <script>
+        const fileGrid = document.getElementById('fileGrid');
+        const fileInput = document.getElementById('fileInput');
+        const progressContainer = document.getElementById('progressContainer');
+        const searchInput = document.getElementById('searchInput');
+        const loadingIndicator = document.getElementById('loadingIndicator');
+        const dropOverlay = document.getElementById('dropOverlay');
+        const statusCount = document.getElementById('statusCount');
+        const statusView = document.getElementById('statusView');
+        const qrBackdrop = document.getElementById('qrBackdrop');
+        const qrUrl = document.getElementById('qrUrl');
+        const contextMenu = document.getElementById('contextMenu');
+        const sortMenu = document.getElementById('sortMenu');
+
+        let currentOffset = 0;
+        const PAGE_SIZE = 40;
+        let isLoading = false;
+        let hasMore = true;
+        let searchTerm = '';
+        let searchTimeout = null;
+        let totalFiles = 0;
+        let currentView = 'grid';
+        let currentSort = 'date-desc';
+        let selectedFile = null;
+
+        qrUrl.textContent = window.location.href;
+
+        // --- Utilities ---
+
+        function formatFileSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const units = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(1024));
+            return (bytes / Math.pow(1024, i)).toFixed(i > 0 ? 1 : 0) + ' ' + units[i];
+        }
+
+        function formatDate(dateStr) {
+            const date = new Date(dateStr);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffMin = Math.floor(diffMs / 60000);
+            const diffHrs = Math.floor(diffMs / 3600000);
+            const diffDays = Math.floor(diffMs / 86400000);
+
+            if (diffMin < 1) return 'Agora';
+            if (diffMin < 60) return `${diffMin} min atrás`;
+            if (diffHrs < 24) return `${diffHrs}h atrás`;
+            if (diffDays === 1) return 'Ontem';
+            if (diffDays < 7) return `${diffDays} dias atrás`;
+            return date.toLocaleDateString('pt-BR');
+        }
+
+        function formatDateFull(dateStr) {
+            return new Date(dateStr).toLocaleString('pt-BR');
+        }
+
+        function getFileIcon(filename) {
+            const ext = filename.split('.').pop().toLowerCase();
+            const icons = {
+                pdf: '📄', doc: '📝', docx: '📝', txt: '📝', rtf: '📝',
+                xls: '📊', xlsx: '📊', csv: '📊',
+                ppt: '📽️', pptx: '📽️',
+                jpg: '🖼️', jpeg: '🖼️', png: '🖼️', gif: '🖼️', webp: '🖼️', svg: '🖼️', bmp: '🖼️',
+                mp4: '🎬', mov: '🎬', avi: '🎬', mkv: '🎬', webm: '🎬', flv: '🎬',
+                mp3: '🎵', wav: '🎵', flac: '🎵', ogg: '🎵', aac: '🎵',
+                zip: '📦', rar: '📦', '7z': '📦', tar: '📦', gz: '📦',
+                js: '💻', ts: '💻', py: '💻', java: '💻', html: '💻', css: '💻',
+                exe: '⚙️', dmg: '⚙️', apk: '⚙️',
+            };
+            return icons[ext] || '📎';
+        }
+
+        // --- QR Modal ---
+
+        function openQrModal() { qrBackdrop.classList.add('visible'); }
+
+        function closeQrModal(e) {
+            if (!e || e.target === qrBackdrop) qrBackdrop.classList.remove('visible');
+        }
+
+        function copyUrl() {
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                const btn = event.target;
+                const original = btn.textContent;
+                btn.textContent = 'Copiado!';
+                setTimeout(() => { btn.textContent = original; }, 1500);
+            });
+        }
+
+        // --- View ---
+
+        function setView(view) {
+            currentView = view;
+            fileGrid.className = view === 'list' ? 'file-grid list-view' : 'file-grid';
+            document.getElementById('viewGrid').classList.toggle('active', view === 'grid');
+            document.getElementById('viewList').classList.toggle('active', view === 'list');
+            statusView.textContent = view === 'grid' ? 'Grade' : 'Lista';
+        }
+
+        // --- Sort ---
+
+        function toggleSortMenu() {
+            sortMenu.classList.toggle('visible');
+        }
+
+        function setSort(sort) {
+            currentSort = sort;
+            sortMenu.querySelectorAll('.sort-menu-item').forEach(item => {
+                const isActive = item.dataset.sort === sort;
+                item.classList.toggle('active', isActive);
+                item.querySelector('.check').textContent = isActive ? '✓' : '';
+            });
+            sortMenu.classList.remove('visible');
+            resetAndLoadFiles();
+        }
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.sort-dropdown')) sortMenu.classList.remove('visible');
+            if (!e.target.closest('.context-menu') && !e.target.closest('.file-card')) {
+                contextMenu.classList.remove('visible');
+            }
+        });
+
+        // --- Context Menu ---
+
+        function showContextMenu(e, file) {
+            e.preventDefault();
+            selectedFile = file;
+            contextMenu.style.left = e.clientX + 'px';
+            contextMenu.style.top = e.clientY + 'px';
+            contextMenu.classList.add('visible');
+        }
+
+        document.getElementById('ctxDownload').onclick = () => {
+            if (selectedFile) {
+                const a = document.createElement('a');
+                a.href = '/download/' + encodeURIComponent(selectedFile.filename);
+                a.download = selectedFile.displayName;
+                a.click();
+            }
+            contextMenu.classList.remove('visible');
+        };
+
+        document.getElementById('ctxCopyName').onclick = () => {
+            if (selectedFile) navigator.clipboard.writeText(selectedFile.displayName);
+            contextMenu.classList.remove('visible');
+        };
+
+        // --- Upload ---
+
+        function handleFiles(files) {
+            if (!files || files.length === 0) return;
+            Array.from(files).forEach(file => uploadFile(file));
+        }
+
+        function uploadFile(file) {
+            const id = 'up-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
+
+            const item = document.createElement('div');
+            item.className = 'progress-item';
+            item.id = id;
+            item.innerHTML = `
+                <span class="progress-item-name">${file.name}</span>
+                <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
+                <span class="progress-item-percent">0%</span>
+            `;
+            progressContainer.appendChild(item);
+
+            const formData = new FormData();
+            formData.append('files', file);
+
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', '/api/upload');
+
+            xhr.upload.onprogress = (e) => {
+                if (e.lengthComputable) {
+                    const pct = Math.round((e.loaded / e.total) * 100);
+                    item.querySelector('.progress-bar-fill').style.width = pct + '%';
+                    item.querySelector('.progress-item-percent').textContent = pct + '%';
+                }
+            };
+
+            xhr.onload = () => {
+                const fill = item.querySelector('.progress-bar-fill');
+                const pctLabel = item.querySelector('.progress-item-percent');
+                if (xhr.status === 200) {
+                    fill.style.width = '100%';
+                    fill.classList.add('complete');
+                    pctLabel.textContent = '✓';
+                    setTimeout(() => { item.style.opacity = '0'; setTimeout(() => item.remove(), 300); }, 1500);
+                    resetAndLoadFiles();
+                } else {
+                    fill.classList.add('error');
+                    pctLabel.textContent = '✗';
+                    setTimeout(() => item.remove(), 4000);
+                }
+            };
+
+            xhr.onerror = () => {
+                item.querySelector('.progress-bar-fill').classList.add('error');
+                item.querySelector('.progress-item-percent').textContent = '✗';
+                setTimeout(() => item.remove(), 4000);
+            };
+
+            xhr.send(formData);
+        }
+
+        fileInput.addEventListener('change', () => {
+            handleFiles(fileInput.files);
+            fileInput.value = '';
+        });
+
+        // Drag & drop on whole page
+        let dragCounter = 0;
+        document.addEventListener('dragenter', (e) => {
+            e.preventDefault();
+            dragCounter++;
+            dropOverlay.classList.add('visible');
+        });
+        document.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dragCounter--;
+            if (dragCounter <= 0) { dropOverlay.classList.remove('visible'); dragCounter = 0; }
+        });
+        document.addEventListener('dragover', (e) => e.preventDefault());
+        document.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dragCounter = 0;
+            dropOverlay.classList.remove('visible');
+            handleFiles(e.dataTransfer.files);
+        });
+
+        // --- File List ---
+
+        async function loadFiles(append = false) {
+            if (isLoading) return;
+            isLoading = true;
+            loadingIndicator.classList.add('visible');
+
+            try {
+                const params = new URLSearchParams({
+                    offset: currentOffset,
+                    limit: PAGE_SIZE,
+                    sort: currentSort
+                });
+                if (searchTerm) params.set('search', searchTerm);
+
+                const response = await fetch('/api/files?' + params.toString());
+                const data = await response.json();
+
+                if (!append) fileGrid.innerHTML = '';
+
+                totalFiles = data.total;
+                hasMore = data.hasMore;
+                statusCount.textContent = `${totalFiles} item${totalFiles !== 1 ? 's' : ''}`;
+
+                if (data.files.length === 0 && currentOffset === 0) {
+                    fileGrid.innerHTML = `
+                        <div class="empty-state" style="grid-column: 1/-1">
+                            <div class="empty-state-icon">📂</div>
+                            <div class="empty-state-text">${searchTerm ? 'Nenhum arquivo encontrado.' : 'Pasta vazia — arraste arquivos ou clique em Upload.'}</div>
+                        </div>
+                    `;
+                    return;
+                }
+
+                data.files.forEach(file => {
+                    const card = document.createElement('div');
+                    card.className = 'file-card';
+                    card.innerHTML = `
+                        <div class="file-card-icon">${getFileIcon(file.displayName)}</div>
+                        <div class="file-card-name" title="${file.displayName}">${file.displayName}</div>
+                        <div class="file-card-meta">
+                            <span>${formatDateFull(file.createdAt)}</span>
+                            <span>${formatFileSize(file.size)}</span>
+                        </div>
+                    `;
+
+                    card.addEventListener('dblclick', () => {
+                        const a = document.createElement('a');
+                        a.href = '/download/' + encodeURIComponent(file.filename);
+                        a.download = file.displayName;
+                        a.click();
+                    });
+
+                    card.addEventListener('contextmenu', (e) => showContextMenu(e, file));
+
+                    card.addEventListener('click', () => {
+                        fileGrid.querySelectorAll('.file-card.selected').forEach(c => c.classList.remove('selected'));
+                        card.classList.add('selected');
+                    });
+
+                    fileGrid.appendChild(card);
+                });
+
+                currentOffset += data.files.length;
+            } catch (error) {
+                console.error('Erro ao carregar arquivos:', error);
+            } finally {
+                isLoading = false;
+                loadingIndicator.classList.remove('visible');
+            }
+        }
+
+        function resetAndLoadFiles() {
+            currentOffset = 0;
+            hasMore = true;
+            loadFiles(false);
+        }
+
+        // Infinite scroll
+        const fileArea = document.getElementById('fileArea');
+        fileArea.addEventListener('scroll', () => {
+            if (fileArea.scrollTop + fileArea.clientHeight >= fileArea.scrollHeight - 200) {
+                if (hasMore && !isLoading) loadFiles(true);
+            }
+        });
+
+        // Search
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                searchTerm = searchInput.value.trim();
+                currentOffset = 0;
+                hasMore = true;
+                loadFiles(false);
+            }, 300);
+        });
+
+        // --- Init ---
+        setView('grid');
+        loadFiles();
+    </script>
+</body>
+</html>
     <style>
         :root {
             --bg-color: #121212;
