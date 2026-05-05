@@ -708,6 +708,20 @@
         let lastClickedIndex = -1;
         let allLoadedFiles = [];
 
+        // Extract token from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const ACCESS_TOKEN = urlParams.get('token') || '';
+
+        // Helper to add token to API calls
+        function apiUrl(path) {
+            const sep = path.includes('?') ? '&' : '?';
+            return path + sep + 'token=' + ACCESS_TOKEN;
+        }
+
+        function authHeaders() {
+            return { 'x-access-token': ACCESS_TOKEN };
+        }
+
         qrUrl.textContent = window.location.href;
 
         // --- Utilities ---
@@ -884,7 +898,7 @@
         document.getElementById('ctxDownload').onclick = () => {
             if (selectedFiles.length === 1) {
                 const a = document.createElement('a');
-                a.href = '/download/' + encodeURIComponent(selectedFiles[0].filename);
+                a.href = '/download/' + encodeURIComponent(selectedFiles[0].filename) + '?token=' + ACCESS_TOKEN;
                 a.download = selectedFiles[0].displayName;
                 a.click();
             }
@@ -897,7 +911,7 @@
             try {
                 const response = await fetch('/api/download-zip', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'x-access-token': ACCESS_TOKEN },
                     body: JSON.stringify({ files: filenames })
                 });
                 const blob = await response.blob();
@@ -927,7 +941,7 @@
             try {
                 await fetch('/api/delete', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
+                    headers: { 'Content-Type': 'application/json', 'x-access-token': ACCESS_TOKEN },
                     body: JSON.stringify({ files: getSelectedFilenames() })
                 });
                 selectedFiles = [];
@@ -961,7 +975,7 @@
             formData.append('files', file);
 
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/api/upload');
+            xhr.open('POST', '/api/upload?token=' + ACCESS_TOKEN);
 
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
@@ -1032,7 +1046,8 @@
                 const params = new URLSearchParams({
                     offset: currentOffset,
                     limit: PAGE_SIZE,
-                    sort: currentSort
+                    sort: currentSort,
+                    token: ACCESS_TOKEN
                 });
                 if (searchTerm) params.set('search', searchTerm);
 
@@ -1078,7 +1093,7 @@
 
                     card.addEventListener('dblclick', () => {
                         const a = document.createElement('a');
-                        a.href = '/download/' + encodeURIComponent(file.filename);
+                        a.href = '/download/' + encodeURIComponent(file.filename) + '?token=' + ACCESS_TOKEN;
                         a.download = file.displayName;
                         a.click();
                     });
