@@ -127,10 +127,47 @@ app.get('/api/files', authRequired, (req, res) => {
     });
 });
 
+// --- Server-Sent Events for realtime sync across devices ---
+const sseClients = new Set();
+
+app.get('/api/events', authRequired, (req, res) => {
+    res.set({
+        'Content-Type': 'text/event-stream',
+        'Cache-Control': 'no-cache, no-transform',
+        'Connection': 'keep-alive',
+        'X-Accel-Buffering': 'no'
+    });
+    res.flushHeaders?.();
+    res.write(`event: connected\ndata: {"ok":true}\n\n`);
+
+    sseClients.add(res);
+
+    const keepAlive = setInterval(() => {
+        try { res.write(': ping\n\n'); } catch {}
+    }, 25000);
+
+    req.on('close', () => {
+        clearInterval(keepAlive);
+        sseClients.delete(res);
+    });
+});
+
+function broadcastEvent(type, payload = {}) {
+    const data = `event: ${type}\ndata: ${JSON.stringify({ ...payload, ts: Date.now() })}\n\n`;
+    for (const client of sseClients) {
+        try { client.write(data); } catch {}
+    }
+}
+
 app.post('/api/upload', authRequired, upload.array('files', 50), (req, res) => {
     if (!req.files || req.files.length === 0) {
         return res.status(400).json({ error: 'Nenhum arquivo enviado' });
     }
+    broadcastEvent('files-changed', {
+        action: 'upload',
+        count: req.files.length,
+        files: req.files.map(f => f.filename)
+    });
     res.json({
         message: `${req.files.length} arquivo(s) enviado(s) com sucesso!`,
         count: req.files.length
@@ -160,6 +197,9 @@ app.post('/api/delete', authRequired, (req, res) => {
         }
     });
 
+    if (deleted > 0) {
+        broadcastEvent('files-changed', { action: 'delete', count: deleted });
+    }
     res.json({ deleted, errors });
 });
 
