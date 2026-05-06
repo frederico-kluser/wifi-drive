@@ -1138,6 +1138,28 @@
             }, 300);
         });
 
+        // --- Realtime sync via Server-Sent Events ---
+        let evtSource = null;
+        let reloadDebounce = null;
+        function scheduleReload() {
+            clearTimeout(reloadDebounce);
+            reloadDebounce = setTimeout(() => resetAndLoadFiles(), 200);
+        }
+        function connectEvents() {
+            try {
+                if (evtSource) evtSource.close();
+                evtSource = new EventSource('/api/events?token=' + encodeURIComponent(ACCESS_TOKEN));
+                evtSource.addEventListener('files-changed', () => scheduleReload());
+                evtSource.onerror = () => {
+                    if (evtSource) evtSource.close();
+                    setTimeout(connectEvents, 3000);
+                };
+            } catch (e) {
+                setTimeout(connectEvents, 3000);
+            }
+        }
+        connectEvents();
+
         // --- Init ---
         setView('grid');
         loadFiles();
