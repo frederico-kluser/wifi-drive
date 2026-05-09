@@ -557,11 +557,262 @@
             to { opacity: 1; }
         }
 
+        /* New file pulse (when files arrive via realtime sync) */
+        @keyframes pulseNew {
+            0%   { box-shadow: 0 0 0 0 rgba(0, 120, 212, 0.7); background-color: rgba(0, 120, 212, 0.25); }
+            70%  { box-shadow: 0 0 0 10px rgba(0, 120, 212, 0); background-color: rgba(0, 120, 212, 0.10); }
+            100% { box-shadow: 0 0 0 0 rgba(0, 120, 212, 0); background-color: transparent; }
+        }
+        .file-card.new-arrival { animation: pulseNew 1.8s ease-out; }
+
+        /* Toast notifications (real-time activity from other devices) */
+        .toast-container {
+            position: fixed;
+            bottom: 100px;
+            left: 20px;
+            display: flex;
+            flex-direction: column-reverse;
+            gap: 8px;
+            z-index: 220;
+            pointer-events: none;
+            max-width: 320px;
+        }
+
+        .toast {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-left: 3px solid var(--accent-color);
+            border-radius: var(--radius);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.45);
+            padding: 9px 12px;
+            color: var(--text-primary);
+            font-size: 0.82rem;
+            pointer-events: auto;
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            animation: toastIn 0.25s ease-out;
+        }
+        .toast.upload { border-left-color: var(--success-color); }
+        .toast.delete { border-left-color: var(--error-color); }
+        .toast.fading { animation: toastOut 0.3s ease-in forwards; }
+
+        .toast-icon { font-size: 1.05rem; line-height: 1.1; }
+        .toast-body { flex: 1; min-width: 0; }
+        .toast-title { font-weight: 500; margin-bottom: 2px; line-height: 1.2; }
+        .toast-detail {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        @keyframes toastIn {
+            from { transform: translateX(-110%); opacity: 0; }
+            to   { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes toastOut {
+            to { transform: translateX(-110%); opacity: 0; }
+        }
+
+        /* Text viewer modal */
+        .viewer-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 250;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .viewer-backdrop.visible { display: flex; }
+
+        .viewer-modal {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            width: min(1100px, 100%);
+            height: min(85vh, 100%);
+            overflow: hidden;
+        }
+
+        .viewer-header {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: var(--toolbar-color);
+            border-bottom: 1px solid var(--border-color);
+            gap: 10px;
+            flex-shrink: 0;
+        }
+        .viewer-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.88rem;
+            font-weight: 500;
+            min-width: 0;
+            flex: 1;
+        }
+        .viewer-name {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            user-select: text;
+        }
+        .viewer-icon { font-size: 1.05rem; flex-shrink: 0; }
+        .viewer-meta {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        .viewer-actions { display: flex; gap: 4px; flex-shrink: 0; }
+
+        .viewer-btn {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            padding: 5px 9px;
+            font-size: 0.78rem;
+            cursor: pointer;
+            border-radius: var(--radius);
+            transition: all 0.15s;
+            white-space: nowrap;
+        }
+        .viewer-btn:hover {
+            background-color: var(--hover-bg);
+            color: var(--text-primary);
+            border-color: var(--border-color);
+        }
+        .viewer-btn.active {
+            background-color: var(--accent-light);
+            color: var(--accent-color);
+            border-color: var(--accent-color);
+        }
+
+        .viewer-search-bar {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            background-color: var(--surface-color);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .viewer-search-bar input {
+            flex: 1;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius);
+            color: var(--text-primary);
+            padding: 5px 10px;
+            font-size: 0.8rem;
+        }
+        .viewer-search-bar input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+        .viewer-search-info {
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            min-width: 90px;
+            text-align: right;
+        }
+
+        .viewer-body {
+            flex: 1;
+            overflow: auto;
+            background-color: var(--bg-color);
+            display: grid;
+            grid-template-columns: auto 1fr;
+            align-items: stretch;
+            user-select: text;
+        }
+        .viewer-gutter, .viewer-content {
+            margin: 0;
+            padding: 12px;
+            font-family: 'Cascadia Code', 'JetBrains Mono', 'Fira Code', 'Consolas', 'Courier New', monospace;
+            font-size: 0.82rem;
+            line-height: 1.5;
+            white-space: pre;
+            user-select: text;
+        }
+        .viewer-gutter {
+            background-color: var(--toolbar-color);
+            color: var(--text-secondary);
+            text-align: right;
+            user-select: none;
+            border-right: 1px solid var(--border-color);
+            position: sticky;
+            left: 0;
+            min-width: 50px;
+        }
+        .viewer-body.wrap { grid-template-columns: 1fr; }
+        .viewer-body.wrap .viewer-gutter { display: none; }
+        .viewer-body.wrap .viewer-content {
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+
+        .viewer-content mark.match {
+            background-color: rgba(255, 220, 0, 0.4);
+            color: inherit;
+            border-radius: 2px;
+            padding: 0 1px;
+        }
+        .viewer-content mark.match.current {
+            background-color: rgba(255, 165, 0, 0.85);
+            outline: 1px solid #ffae42;
+            color: #1a1a1a;
+        }
+
+        .viewer-loading, .viewer-error {
+            grid-column: 1 / -1;
+            padding: 40px 20px;
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+            white-space: normal;
+        }
+        .viewer-error { color: var(--error-color); }
+        .viewer-error .viewer-error-action {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 5px 12px;
+            background-color: var(--accent-color);
+            color: #fff;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .viewer-error .viewer-error-action:hover { background-color: var(--accent-hover); }
+
+        .viewer-footer {
+            padding: 4px 12px;
+            background-color: var(--toolbar-color);
+            border-top: 1px solid var(--border-color);
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            flex-shrink: 0;
+        }
+
         @media (max-width: 600px) {
             .toolbar-search input { width: 130px; }
             .toolbar-search input:focus { width: 160px; }
             .file-grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); }
             .toolbar-title span { display: none; }
+
+            .viewer-backdrop { padding: 0; }
+            .viewer-modal { width: 100%; height: 100%; border-radius: 0; }
+            .viewer-meta { display: none; }
+            .viewer-btn { padding: 5px 7px; font-size: 0.74rem; }
+            .toast-container { left: 10px; right: 10px; max-width: none; bottom: 90px; }
         }
     </style>
 </head>
@@ -670,12 +921,46 @@
 
     <!-- Context Menu -->
     <div class="context-menu" id="contextMenu">
+        <div class="context-menu-item" id="ctxView">📖 Visualizar</div>
         <div class="context-menu-item" id="ctxDownload">⬇ Baixar</div>
         <div class="context-menu-item" id="ctxDownloadZip">📦 Baixar como ZIP</div>
         <div class="context-menu-separator"></div>
         <div class="context-menu-item" id="ctxCopyName">📋 Copiar nome</div>
         <div class="context-menu-separator"></div>
         <div class="context-menu-item" id="ctxDelete" style="color: var(--error-color);">🗑 Excluir</div>
+    </div>
+
+    <!-- Toast container (real-time activity) -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- Text viewer modal -->
+    <div class="viewer-backdrop" id="viewerBackdrop">
+        <div class="viewer-modal" id="viewerModal">
+            <div class="viewer-header">
+                <div class="viewer-title">
+                    <span class="viewer-icon" id="viewerIcon">📝</span>
+                    <span class="viewer-name" id="viewerName"></span>
+                </div>
+                <div class="viewer-meta" id="viewerMeta"></div>
+                <div class="viewer-actions">
+                    <button class="viewer-btn" id="viewerWrap" title="Quebra de linha">↩ Quebra</button>
+                    <button class="viewer-btn" id="viewerCopy" title="Copiar todo o conteúdo">📋 Copiar</button>
+                    <button class="viewer-btn" id="viewerDownload" title="Baixar arquivo">⬇ Baixar</button>
+                    <button class="viewer-btn viewer-close" id="viewerClose" title="Fechar (Esc)">✕</button>
+                </div>
+            </div>
+            <div class="viewer-search-bar">
+                <input type="text" id="viewerSearch" placeholder="Buscar no conteúdo… (Enter próximo, Shift+Enter anterior)">
+                <span class="viewer-search-info" id="viewerSearchInfo"></span>
+            </div>
+            <div class="viewer-body" id="viewerBody">
+                <pre class="viewer-gutter" id="viewerGutter"></pre>
+                <pre class="viewer-content" id="viewerContent"></pre>
+            </div>
+            <div class="viewer-footer">
+                <span id="viewerStats"></span>
+            </div>
+        </div>
     </div>
 
     <!-- Hidden input -->
@@ -712,6 +997,13 @@
         const urlParams = new URLSearchParams(window.location.search);
         const ACCESS_TOKEN = urlParams.get('token') || '';
 
+        // Per-tab unique id, used so the server can skip echoing this tab's own writes
+        // back to it via SSE (we already update locally on success)
+        const CLIENT_ID = (() => {
+            try { return crypto.randomUUID(); }
+            catch { return 'c-' + Math.random().toString(36).slice(2) + '-' + Date.now().toString(36); }
+        })();
+
         // Helper to add token to API calls
         function apiUrl(path) {
             const sep = path.includes('?') ? '&' : '?';
@@ -720,6 +1012,42 @@
 
         function authHeaders() {
             return { 'x-access-token': ACCESS_TOKEN };
+        }
+
+        function escapeHtml(s) {
+            return String(s).replace(/[&<>"']/g, c => ({
+                '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+            }[c]));
+        }
+
+        // Track displayNames that arrived via SSE so we can pulse them on the next render
+        const recentlyAddedNames = new Set();
+
+        // --- Toast notifications ---
+        function showToast({ type, title, detail, icon }) {
+            const container = document.getElementById('toastContainer');
+            if (!container) return;
+            const t = document.createElement('div');
+            t.className = 'toast' + (type ? ' ' + type : '');
+            t.innerHTML = `
+                <div class="toast-icon"></div>
+                <div class="toast-body">
+                    <div class="toast-title"></div>
+                    <div class="toast-detail"></div>
+                </div>
+            `;
+            t.querySelector('.toast-icon').textContent = icon || '📄';
+            t.querySelector('.toast-title').textContent = title || '';
+            const detailEl = t.querySelector('.toast-detail');
+            if (detail) detailEl.textContent = detail;
+            else detailEl.remove();
+            container.appendChild(t);
+            // Cap to ~5 visible toasts
+            while (container.children.length > 5) container.removeChild(container.firstChild);
+            setTimeout(() => {
+                t.classList.add('fading');
+                setTimeout(() => t.remove(), 350);
+            }, 4500);
         }
 
         qrUrl.textContent = window.location.href;
@@ -880,11 +1208,13 @@
                 updateSelectionUI();
             }
             contextMenu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
-            contextMenu.style.top = Math.min(e.clientY, window.innerHeight - 160) + 'px';
+            contextMenu.style.top = Math.min(e.clientY, window.innerHeight - 200) + 'px';
             contextMenu.classList.add('visible');
 
             // Show/hide items based on selection count
             const count = selectedFiles.length;
+            const isText = count === 1 && isTextFile(selectedFiles[0].displayName);
+            document.getElementById('ctxView').style.display = isText ? '' : 'none';
             document.getElementById('ctxDownload').style.display = count === 1 ? '' : 'none';
             document.getElementById('ctxCopyName').style.display = count === 1 ? '' : 'none';
             document.getElementById('ctxDownloadZip').textContent = count > 1
@@ -894,6 +1224,11 @@
                 ? `🗑 Excluir ${count} arquivos`
                 : '🗑 Excluir';
         }
+
+        document.getElementById('ctxView').onclick = () => {
+            contextMenu.classList.remove('visible');
+            if (selectedFiles.length === 1) openViewer(selectedFiles[0]);
+        };
 
         document.getElementById('ctxDownload').onclick = () => {
             if (selectedFiles.length === 1) {
@@ -942,7 +1277,7 @@
                 await fetch('/api/delete', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', 'x-access-token': ACCESS_TOKEN },
-                    body: JSON.stringify({ files: getSelectedFilenames() })
+                    body: JSON.stringify({ files: getSelectedFilenames(), clientId: CLIENT_ID })
                 });
                 selectedFiles = [];
                 resetAndLoadFiles();
@@ -975,7 +1310,7 @@
             formData.append('files', file);
 
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/api/upload?token=' + ACCESS_TOKEN);
+            xhr.open('POST', '/api/upload?token=' + ACCESS_TOKEN + '&clientId=' + encodeURIComponent(CLIENT_ID));
 
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
@@ -1082,9 +1417,16 @@
                     if (selectedFiles.some(sf => sf.filename === file.filename)) {
                         card.classList.add('selected');
                     }
+                    if (recentlyAddedNames.has(file.displayName)) {
+                        card.classList.add('new-arrival');
+                        recentlyAddedNames.delete(file.displayName);
+                        // Strip the class after the animation completes so re-renders don't replay it
+                        setTimeout(() => card.classList.remove('new-arrival'), 1900);
+                    }
+                    const safeName = escapeHtml(file.displayName);
                     card.innerHTML = `
                         <div class="file-card-icon">${getFileIcon(file.displayName)}</div>
-                        <div class="file-card-name" title="${file.displayName}">${file.displayName}</div>
+                        <div class="file-card-name" title="${safeName}">${safeName}</div>
                         <div class="file-card-meta">
                             <span>${formatDateFull(file.createdAt)}</span>
                             <span>${formatFileSize(file.size)}</span>
@@ -1092,6 +1434,10 @@
                     `;
 
                     card.addEventListener('dblclick', () => {
+                        if (isTextFile(file.displayName)) {
+                            openViewer(file);
+                            return;
+                        }
                         const a = document.createElement('a');
                         a.href = '/download/' + encodeURIComponent(file.filename) + '?token=' + ACCESS_TOKEN;
                         a.download = file.displayName;
@@ -1138,26 +1484,332 @@
             }, 300);
         });
 
+        // --- Embedded text viewer ---
+        const TEXT_EXTENSIONS = new Set([
+            'txt','md','markdown','log','csv','tsv','rtf',
+            'json','json5','xml','yaml','yml','toml','ini','conf','cfg','env','properties',
+            'js','mjs','cjs','jsx','ts','tsx','vue','svelte',
+            'py','rb','php','java','kt','kts','swift','go','rs','c','h','cpp','cc','cxx','hpp','hh','cs','m','mm','dart','lua','pl','r','jl','scala','clj','ex','exs','erl','hs','fs','vb',
+            'html','htm','css','scss','sass','less','styl',
+            'sh','bash','zsh','fish','ps1','bat','cmd','tcl',
+            'sql','graphql','gql','proto',
+            'patch','diff','srt','vtt','ass','sub',
+            'tex','bib'
+        ]);
+        const TEXT_FILENAMES = new Set([
+            'dockerfile','makefile','rakefile','gemfile','procfile','license','readme',
+            '.gitignore','.gitattributes','.dockerignore','.editorconfig','.npmrc','.nvmrc',
+            '.eslintrc','.prettierrc','.babelrc'
+        ]);
+
+        function isTextFile(displayName) {
+            if (!displayName) return false;
+            const lc = displayName.toLowerCase();
+            if (TEXT_FILENAMES.has(lc)) return true;
+            if (lc.startsWith('.env')) return true;
+            const dot = lc.lastIndexOf('.');
+            if (dot < 0) return false;
+            return TEXT_EXTENSIONS.has(lc.substring(dot + 1));
+        }
+
+        const viewerBackdrop = document.getElementById('viewerBackdrop');
+        const viewerName = document.getElementById('viewerName');
+        const viewerIcon = document.getElementById('viewerIcon');
+        const viewerMeta = document.getElementById('viewerMeta');
+        const viewerBody = document.getElementById('viewerBody');
+        const viewerGutter = document.getElementById('viewerGutter');
+        const viewerContent = document.getElementById('viewerContent');
+        const viewerStats = document.getElementById('viewerStats');
+        const viewerSearch = document.getElementById('viewerSearch');
+        const viewerSearchInfo = document.getElementById('viewerSearchInfo');
+        const viewerWrapBtn = document.getElementById('viewerWrap');
+
+        let viewerCurrentFile = null;
+        let viewerCurrentContent = '';
+        let viewerWrapEnabled = false;
+        let viewerSearchMatches = [];
+        let viewerCurrentMatch = -1;
+        let viewerSearchTimeout = null;
+
+        function closeViewer() {
+            viewerBackdrop.classList.remove('visible');
+            viewerCurrentFile = null;
+            viewerCurrentContent = '';
+            viewerSearch.value = '';
+            viewerSearchInfo.textContent = '';
+            viewerSearchMatches = [];
+            viewerCurrentMatch = -1;
+            viewerContent.innerHTML = '';
+            viewerGutter.textContent = '';
+        }
+
+        async function openViewer(file) {
+            viewerCurrentFile = file;
+            viewerName.textContent = file.displayName;
+            viewerIcon.textContent = getFileIcon(file.displayName);
+            viewerMeta.textContent = formatFileSize(file.size);
+            viewerStats.textContent = '';
+            viewerSearch.value = '';
+            viewerSearchInfo.textContent = '';
+            viewerWrapEnabled = false;
+            viewerWrapBtn.classList.remove('active');
+            viewerBody.classList.remove('wrap');
+            viewerGutter.textContent = '';
+            viewerContent.innerHTML = '';
+            viewerContent.appendChild(Object.assign(document.createElement('div'), {
+                className: 'viewer-loading',
+                textContent: 'Carregando…'
+            }));
+            viewerBackdrop.classList.add('visible');
+
+            try {
+                const resp = await fetch('/api/text/' + encodeURIComponent(file.filename) + '?token=' + ACCESS_TOKEN);
+                let data = {};
+                try { data = await resp.json(); } catch {}
+                if (!resp.ok) {
+                    showViewerError(data.error || `Erro ${resp.status} ao abrir arquivo.`);
+                    return;
+                }
+                viewerCurrentContent = data.content || '';
+                renderViewerContent();
+                const lineCount = viewerCurrentContent.split('\n').length;
+                const charCount = viewerCurrentContent.length;
+                viewerStats.textContent =
+                    `${lineCount.toLocaleString('pt-BR')} linha${lineCount !== 1 ? 's' : ''} • ` +
+                    `${charCount.toLocaleString('pt-BR')} caracteres • ` +
+                    `${data.encoding || 'UTF-8'} • ${formatFileSize(data.size || 0)}`;
+            } catch (err) {
+                showViewerError('Erro de rede ao abrir o arquivo.');
+            }
+        }
+
+        function showViewerError(msg) {
+            viewerContent.innerHTML = '';
+            viewerGutter.textContent = '';
+            const wrap = document.createElement('div');
+            wrap.className = 'viewer-error';
+            wrap.textContent = msg;
+            if (viewerCurrentFile) {
+                const action = document.createElement('a');
+                action.className = 'viewer-error-action';
+                action.textContent = '⬇ Baixar arquivo';
+                action.href = '/download/' + encodeURIComponent(viewerCurrentFile.filename) + '?token=' + ACCESS_TOKEN;
+                action.download = viewerCurrentFile.displayName;
+                wrap.appendChild(document.createElement('br'));
+                wrap.appendChild(action);
+            }
+            viewerContent.appendChild(wrap);
+        }
+
+        function renderViewerContent() {
+            viewerContent.textContent = viewerCurrentContent;
+            const lines = viewerCurrentContent.length === 0 ? 1 : viewerCurrentContent.split('\n').length;
+            // Build gutter once; toggle visibility via CSS when wrap is on.
+            let gutter = '';
+            for (let i = 1; i <= lines; i++) gutter += i + (i < lines ? '\n' : '');
+            viewerGutter.textContent = gutter;
+            viewerSearchMatches = [];
+            viewerCurrentMatch = -1;
+        }
+
+        function runViewerSearch(q) {
+            if (!q) {
+                viewerContent.textContent = viewerCurrentContent;
+                viewerSearchInfo.textContent = '';
+                viewerSearchMatches = [];
+                viewerCurrentMatch = -1;
+                return;
+            }
+            const ql = q.toLowerCase();
+            const text = viewerCurrentContent;
+            const tl = text.toLowerCase();
+            const MAX_MATCHES = 5000;
+            let html = '';
+            let last = 0;
+            let count = 0;
+            let idx;
+            while ((idx = tl.indexOf(ql, last)) !== -1) {
+                html += escapeHtml(text.substring(last, idx));
+                html += '<mark class="match">' + escapeHtml(text.substr(idx, q.length)) + '</mark>';
+                last = idx + q.length;
+                count++;
+                if (count >= MAX_MATCHES) break;
+            }
+            html += escapeHtml(text.substring(last));
+            viewerContent.innerHTML = html;
+            viewerSearchMatches = Array.from(viewerContent.querySelectorAll('mark.match'));
+            if (viewerSearchMatches.length > 0) {
+                viewerCurrentMatch = 0;
+                viewerSearchMatches[0].classList.add('current');
+                viewerSearchMatches[0].scrollIntoView({ block: 'center' });
+                viewerSearchInfo.textContent = count >= MAX_MATCHES
+                    ? `1 / ${viewerSearchMatches.length}+`
+                    : `1 / ${viewerSearchMatches.length}`;
+            } else {
+                viewerCurrentMatch = -1;
+                viewerSearchInfo.textContent = '0 resultados';
+            }
+        }
+
+        function gotoMatch(delta) {
+            if (viewerSearchMatches.length === 0) return;
+            if (viewerCurrentMatch >= 0) viewerSearchMatches[viewerCurrentMatch].classList.remove('current');
+            viewerCurrentMatch = (viewerCurrentMatch + delta + viewerSearchMatches.length) % viewerSearchMatches.length;
+            const el = viewerSearchMatches[viewerCurrentMatch];
+            el.classList.add('current');
+            el.scrollIntoView({ block: 'center' });
+            viewerSearchInfo.textContent = `${viewerCurrentMatch + 1} / ${viewerSearchMatches.length}`;
+        }
+
+        viewerSearch.addEventListener('input', (e) => {
+            clearTimeout(viewerSearchTimeout);
+            const v = e.target.value;
+            viewerSearchTimeout = setTimeout(() => runViewerSearch(v), 150);
+        });
+        viewerSearch.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                if (viewerSearchMatches.length === 0 && viewerSearch.value) {
+                    runViewerSearch(viewerSearch.value);
+                    return;
+                }
+                gotoMatch(e.shiftKey ? -1 : 1);
+            } else if (e.key === 'Escape') {
+                viewerSearch.value = '';
+                runViewerSearch('');
+                viewerSearch.blur();
+            }
+        });
+
+        viewerBackdrop.addEventListener('click', (e) => {
+            if (e.target === viewerBackdrop) closeViewer();
+        });
+
+        document.getElementById('viewerClose').onclick = closeViewer;
+
+        viewerWrapBtn.onclick = () => {
+            viewerWrapEnabled = !viewerWrapEnabled;
+            viewerWrapBtn.classList.toggle('active', viewerWrapEnabled);
+            viewerBody.classList.toggle('wrap', viewerWrapEnabled);
+        };
+
+        document.getElementById('viewerCopy').onclick = function () {
+            if (!viewerCurrentContent) return;
+            navigator.clipboard.writeText(viewerCurrentContent).then(() => {
+                const orig = this.textContent;
+                this.textContent = '✓ Copiado';
+                setTimeout(() => { this.textContent = orig; }, 1300);
+            }).catch(() => {
+                this.textContent = '✗ Erro';
+                setTimeout(() => { this.textContent = '📋 Copiar'; }, 1300);
+            });
+        };
+
+        document.getElementById('viewerDownload').onclick = () => {
+            if (!viewerCurrentFile) return;
+            const a = document.createElement('a');
+            a.href = '/download/' + encodeURIComponent(viewerCurrentFile.filename) + '?token=' + ACCESS_TOKEN;
+            a.download = viewerCurrentFile.displayName;
+            a.click();
+        };
+
+        document.addEventListener('keydown', (e) => {
+            if (!viewerBackdrop.classList.contains('visible')) return;
+            if (e.key === 'Escape' && document.activeElement !== viewerSearch) {
+                e.preventDefault();
+                closeViewer();
+            } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'f') {
+                e.preventDefault();
+                viewerSearch.focus();
+                viewerSearch.select();
+            } else if (e.key === 'F3') {
+                e.preventDefault();
+                gotoMatch(e.shiftKey ? -1 : 1);
+            }
+        });
+
         // --- Realtime sync via Server-Sent Events ---
         let evtSource = null;
         let reloadDebounce = null;
+        let reconnectTimer = null;
+        let reconnectAttempts = 0;
+        let evtClosed = false;
+
         function scheduleReload() {
             clearTimeout(reloadDebounce);
-            reloadDebounce = setTimeout(() => resetAndLoadFiles(), 200);
+            reloadDebounce = setTimeout(() => resetAndLoadFiles(), 500);
         }
-        function connectEvents() {
-            try {
-                if (evtSource) evtSource.close();
-                evtSource = new EventSource('/api/events?token=' + encodeURIComponent(ACCESS_TOKEN));
-                evtSource.addEventListener('files-changed', () => scheduleReload());
-                evtSource.onerror = () => {
-                    if (evtSource) evtSource.close();
-                    setTimeout(connectEvents, 3000);
-                };
-            } catch (e) {
-                setTimeout(connectEvents, 3000);
+
+        function closeEvents() {
+            evtClosed = true;
+            clearTimeout(reconnectTimer);
+            reconnectTimer = null;
+            if (evtSource) {
+                try { evtSource.close(); } catch {}
+                evtSource = null;
             }
         }
+
+        function connectEvents() {
+            if (document.hidden) return;
+            if (evtSource && evtSource.readyState !== 2) return;
+            evtClosed = false;
+            try {
+                if (evtSource) { try { evtSource.close(); } catch {} }
+                evtSource = new EventSource('/api/events?token=' + encodeURIComponent(ACCESS_TOKEN) + '&clientId=' + encodeURIComponent(CLIENT_ID));
+                evtSource.addEventListener('connected', () => { reconnectAttempts = 0; });
+                evtSource.addEventListener('files-changed', (e) => {
+                    let payload = {};
+                    try { payload = JSON.parse(e.data || '{}'); } catch {}
+                    const files = Array.isArray(payload.files) ? payload.files : [];
+                    const names = files.map(f => f && (f.displayName || f.filename)).filter(Boolean);
+                    const count = payload.count || names.length || 0;
+
+                    if (payload.action === 'upload') {
+                        names.forEach(n => recentlyAddedNames.add(n));
+                        showToast({
+                            type: 'upload',
+                            icon: '📥',
+                            title: count > 1 ? `${count} arquivos enviados de outro dispositivo` : 'Novo arquivo de outro dispositivo',
+                            detail: names.join(', ')
+                        });
+                    } else if (payload.action === 'delete') {
+                        showToast({
+                            type: 'delete',
+                            icon: '🗑',
+                            title: count > 1 ? `${count} arquivos removidos de outro dispositivo` : 'Arquivo removido de outro dispositivo',
+                            detail: names.join(', ')
+                        });
+                    }
+                    scheduleReload();
+                });
+                evtSource.onerror = () => {
+                    if (evtSource) { try { evtSource.close(); } catch {} evtSource = null; }
+                    if (evtClosed || document.hidden) return;
+                    reconnectAttempts++;
+                    const delay = Math.min(30000, 2000 * Math.pow(2, Math.min(reconnectAttempts - 1, 4)));
+                    clearTimeout(reconnectTimer);
+                    reconnectTimer = setTimeout(connectEvents, delay);
+                };
+            } catch (e) {
+                reconnectAttempts++;
+                const delay = Math.min(30000, 2000 * Math.pow(2, Math.min(reconnectAttempts - 1, 4)));
+                clearTimeout(reconnectTimer);
+                reconnectTimer = setTimeout(connectEvents, delay);
+            }
+        }
+
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden) {
+                closeEvents();
+            } else {
+                reconnectAttempts = 0;
+                connectEvents();
+            }
+        });
+        window.addEventListener('pagehide', closeEvents);
+        window.addEventListener('beforeunload', closeEvents);
+
         connectEvents();
 
         // --- Init ---
