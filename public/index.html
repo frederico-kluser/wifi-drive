@@ -813,6 +813,161 @@
             .viewer-meta { display: none; }
             .viewer-btn { padding: 5px 7px; font-size: 0.74rem; }
             .toast-container { left: 10px; right: 10px; max-width: none; bottom: 90px; }
+
+            .media-backdrop, .picker-backdrop { padding: 0; }
+            .media-modal, .picker-modal { width: 100%; height: 100%; border-radius: 0; max-height: none; }
+        }
+
+        /* Path bar: up button + clickable breadcrumb */
+        .path-up-btn {
+            background: none;
+            border: 1px solid transparent;
+            color: var(--text-secondary);
+            padding: 2px 8px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            border-radius: var(--radius);
+            margin-right: 4px;
+            flex-shrink: 0;
+        }
+        .path-up-btn:hover { background-color: var(--hover-bg); color: var(--text-primary); border-color: var(--border-color); }
+        .path-segments { display: flex; align-items: center; gap: 4px; overflow-x: auto; white-space: nowrap; flex: 1; }
+        .path-segments::-webkit-scrollbar { height: 4px; }
+        .path-segment.clickable { cursor: pointer; }
+        .path-segment.clickable:hover { color: var(--text-primary); background-color: var(--hover-bg); }
+
+        .file-card.drop-target { background-color: var(--accent-light); outline: 1px dashed var(--accent-color); }
+
+        /* Media + picker modal shells */
+        .media-backdrop, .picker-backdrop {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background-color: rgba(0,0,0,0.6);
+            z-index: 250;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .media-backdrop.visible, .picker-backdrop.visible { display: flex; }
+
+        .media-modal {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            width: min(1000px, 100%);
+            height: min(80vh, 100%);
+            overflow: hidden;
+        }
+        .media-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 12px;
+            background-color: var(--toolbar-color);
+            border-bottom: 1px solid var(--border-color);
+            flex-shrink: 0;
+        }
+        .media-icon { font-size: 1.05rem; flex-shrink: 0; }
+        .media-name {
+            flex: 1;
+            min-width: 0;
+            font-size: 0.88rem;
+            font-weight: 500;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            user-select: text;
+        }
+        .media-actions { display: flex; gap: 4px; flex-shrink: 0; }
+        .media-body {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #000;
+            overflow: auto;
+            padding: 8px;
+        }
+        .media-video, .media-img { max-width: 100%; max-height: 100%; }
+        .media-audio { width: 90%; }
+        .media-unsupported { color: var(--text-secondary); text-align: center; padding: 40px 20px; font-size: 0.9rem; }
+        .media-unsupported .viewer-error-action {
+            display: inline-block;
+            margin-top: 12px;
+            padding: 5px 12px;
+            background-color: var(--accent-color);
+            color: #fff;
+            border-radius: var(--radius);
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: none;
+        }
+        .media-unsupported .viewer-error-action:hover { background-color: var(--accent-hover); }
+
+        .picker-modal {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.7);
+            display: flex;
+            flex-direction: column;
+            width: min(440px, 100%);
+            height: min(70vh, 100%);
+            overflow: hidden;
+        }
+        .picker-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            background-color: var(--toolbar-color);
+            border-bottom: 1px solid var(--border-color);
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        .picker-breadcrumb {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            flex-wrap: wrap;
+            padding: 8px 14px;
+            font-size: 0.78rem;
+            color: var(--text-secondary);
+            border-bottom: 1px solid var(--border-color);
+        }
+        .picker-breadcrumb .crumb { cursor: pointer; }
+        .picker-breadcrumb .crumb:hover { color: var(--text-primary); }
+        .picker-list { flex: 1; overflow-y: auto; padding: 4px 0; }
+        .picker-row {
+            padding: 9px 16px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-primary);
+        }
+        .picker-row:hover { background-color: var(--hover-bg); }
+        .picker-row.disabled { opacity: 0.4; cursor: not-allowed; }
+        .picker-empty { padding: 20px 16px; color: var(--text-secondary); font-size: 0.82rem; text-align: center; }
+        .picker-footer {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-top: 1px solid var(--border-color);
+        }
+        .picker-dest {
+            flex: 1;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
     </style>
 </head>
@@ -824,6 +979,12 @@
 
         <button class="upload-btn" onclick="fileInput.click()">
             ⬆ Upload
+        </button>
+        <button class="upload-btn" onclick="folderInput.click()" title="Enviar uma pasta inteira do computador">
+            📁 Pasta
+        </button>
+        <button class="toolbar-btn" id="newFolderBtn" onclick="createFolder()" title="Criar nova pasta">
+            ➕ Nova pasta
         </button>
 
         <div class="toolbar-separator"></div>
@@ -870,9 +1031,8 @@
 
     <!-- Path bar -->
     <div class="path-bar">
-        <span class="path-segment">📶 Wi-Fi Drive</span>
-        <span class="path-separator">›</span>
-        <span class="path-segment current">Compartilhados</span>
+        <button class="path-up-btn" id="pathUpBtn" title="Voltar (pasta acima)" onclick="navigateUp()">⬆</button>
+        <span class="path-segments" id="pathSegments"></span>
     </div>
 
     <!-- Progress -->
@@ -922,9 +1082,12 @@
     <!-- Context Menu -->
     <div class="context-menu" id="contextMenu">
         <div class="context-menu-item" id="ctxView">📖 Visualizar</div>
+        <div class="context-menu-item" id="ctxPlay">▶ Reproduzir</div>
         <div class="context-menu-item" id="ctxDownload">⬇ Baixar</div>
         <div class="context-menu-item" id="ctxDownloadZip">📦 Baixar como ZIP</div>
         <div class="context-menu-separator"></div>
+        <div class="context-menu-item" id="ctxRename">✏ Renomear</div>
+        <div class="context-menu-item" id="ctxMove">📂 Mover para…</div>
         <div class="context-menu-item" id="ctxCopyName">📋 Copiar nome</div>
         <div class="context-menu-separator"></div>
         <div class="context-menu-item" id="ctxDelete" style="color: var(--error-color);">🗑 Excluir</div>
@@ -963,12 +1126,47 @@
         </div>
     </div>
 
-    <!-- Hidden input -->
+    <!-- Media player modal -->
+    <div class="media-backdrop" id="mediaBackdrop">
+        <div class="media-modal" id="mediaModal">
+            <div class="media-header">
+                <span class="media-icon" id="mediaIcon">🎬</span>
+                <span class="media-name" id="mediaName"></span>
+                <div class="media-actions">
+                    <button class="viewer-btn" id="mediaDownload" title="Baixar arquivo">⬇ Baixar</button>
+                    <button class="viewer-btn" id="mediaClose" title="Fechar (Esc)">✕</button>
+                </div>
+            </div>
+            <div class="media-body" id="mediaBody"></div>
+        </div>
+    </div>
+
+    <!-- Move picker modal -->
+    <div class="picker-backdrop" id="pickerBackdrop">
+        <div class="picker-modal">
+            <div class="picker-header">
+                <span id="pickerTitle">📂 Mover para…</span>
+                <button class="viewer-btn" id="pickerClose" title="Fechar">✕</button>
+            </div>
+            <div class="picker-breadcrumb" id="pickerBreadcrumb"></div>
+            <div class="picker-list" id="pickerList"></div>
+            <div class="picker-footer">
+                <span class="picker-dest" id="pickerDest"></span>
+                <button class="qr-modal-btn secondary" id="pickerCancel">Cancelar</button>
+                <button class="qr-modal-btn" id="pickerConfirm">Mover aqui</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden inputs -->
     <input type="file" id="fileInput" multiple>
+    <input type="file" id="folderInput" webkitdirectory directory multiple style="display:none">
 
     <script>
         const fileGrid = document.getElementById('fileGrid');
         const fileInput = document.getElementById('fileInput');
+        const folderInput = document.getElementById('folderInput');
+        const fileArea = document.getElementById('fileArea');
         const progressContainer = document.getElementById('progressContainer');
         const searchInput = document.getElementById('searchInput');
         const loadingIndicator = document.getElementById('loadingIndicator');
@@ -980,18 +1178,25 @@
         const contextMenu = document.getElementById('contextMenu');
         const sortMenu = document.getElementById('sortMenu');
 
+        let currentPath = '';
+        let currentBreadcrumb = [{ name: 'Compartilhados', path: '' }];
         let currentOffset = 0;
         const PAGE_SIZE = 40;
         let isLoading = false;
         let hasMore = true;
         let searchTerm = '';
         let searchTimeout = null;
-        let totalFiles = 0;
+        let totalItems = 0;
         let currentView = 'grid';
         let currentSort = 'date-desc';
-        let selectedFiles = [];
+        let selectedItems = [];
         let lastClickedIndex = -1;
-        let allLoadedFiles = [];
+        let allLoadedEntries = [];
+        let suppressHashSync = false;
+
+        // Internal drag (moving items onto a folder card) state
+        let isInternalDrag = false;
+        let internalDragPaths = [];
 
         // Extract token from URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -1014,14 +1219,63 @@
             return { 'x-access-token': ACCESS_TOKEN };
         }
 
+        function jsonHeaders() {
+            return { 'Content-Type': 'application/json', 'x-access-token': ACCESS_TOKEN };
+        }
+
         function escapeHtml(s) {
             return String(s).replace(/[&<>"']/g, c => ({
                 '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
             }[c]));
         }
 
-        // Track displayNames that arrived via SSE so we can pulse them on the next render
-        const recentlyAddedNames = new Set();
+        // Encode each path segment but keep the slashes (for /download & /media routes)
+        function encPath(p) { return String(p).split('/').map(encodeURIComponent).join('/'); }
+        function downloadUrl(entry) { return '/download/' + encPath(entry.path) + '?token=' + ACCESS_TOKEN; }
+        function mediaUrl(entry) { return '/media/' + encPath(entry.path) + '?token=' + ACCESS_TOKEN; }
+        function triggerDownload(entry) {
+            const a = document.createElement('a');
+            a.href = downloadUrl(entry);
+            a.download = entry.name;
+            a.click();
+        }
+
+        function extOf(name) { const i = String(name).lastIndexOf('.'); return i < 0 ? '' : name.slice(i + 1).toLowerCase(); }
+
+        // Browser-playable media classes (drive player vs download fallback)
+        const VIDEO_EXT = new Set(['mp4','m4v','webm','ogv','mkv','avi','mov','flv','wmv','mpeg','mpg','3gp','m2ts']);
+        const AUDIO_EXT = new Set(['mp3','m4a','aac','wav','ogg','oga','opus','flac','weba','wma','aiff']);
+        const IMAGE_EXT = new Set(['jpg','jpeg','png','gif','webp','bmp','svg','avif','ico']);
+        // Containers/codecs browsers generally can't play natively -> download only
+        const UNSUPPORTED_PLAY = new Set(['mkv','avi','flv','wmv','mpeg','mpg','3gp','m2ts','ts','wma','aiff','rmvb','vob']);
+
+        function kindFromName(name) {
+            const e = extOf(name);
+            if (VIDEO_EXT.has(e)) return 'video';
+            if (AUDIO_EXT.has(e)) return 'audio';
+            if (IMAGE_EXT.has(e)) return 'image';
+            if (isTextFile(name)) return 'text';
+            return 'other';
+        }
+        // Coarse kind for an entry (trust server hint, fall back to extension)
+        function entryKind(entry) {
+            if (entry.type === 'folder') return 'folder';
+            return entry.kind || kindFromName(entry.name);
+        }
+        function getEntryIcon(entry) {
+            return entry.type === 'folder' ? '📁' : getFileIcon(entry.name);
+        }
+        // Route an open (double-click / Enter) by entry type and kind
+        function openEntry(entry) {
+            if (entry.type === 'folder') { navigateTo(entry.path); return; }
+            const k = entryKind(entry);
+            if (k === 'video' || k === 'audio' || k === 'image') { openMedia(entry); return; }
+            if (isTextFile(entry.name)) { openViewer(entry); return; }
+            triggerDownload(entry);
+        }
+
+        // Track paths that arrived via SSE so we can pulse them on the next render
+        const recentlyAddedPaths = new Set();
 
         // --- Toast notifications ---
         function showToast({ type, title, detail, icon }) {
@@ -1147,170 +1401,213 @@
                 contextMenu.classList.remove('visible');
             }
             // Deselect all when clicking empty area
-            if (!e.target.closest('.file-card') && !e.target.closest('.context-menu') && !e.target.closest('.toolbar')) {
-                selectedFiles = [];
+            if (!e.target.closest('.file-card') && !e.target.closest('.context-menu')
+                && !e.target.closest('.toolbar') && !e.target.closest('.media-modal')
+                && !e.target.closest('.picker-modal')) {
+                selectedItems = [];
                 updateSelectionUI();
             }
         });
 
         // --- Multi-Select & Context Menu ---
 
-        function getSelectedFilenames() {
-            return selectedFiles.map(f => f.filename);
+        function getSelectedPaths() {
+            return selectedItems.map(s => s.path);
         }
 
         function updateSelectionUI() {
             fileGrid.querySelectorAll('.file-card').forEach((card, i) => {
-                const file = allLoadedFiles[i];
-                if (file && selectedFiles.some(sf => sf.filename === file.filename)) {
+                const entry = allLoadedEntries[i];
+                if (entry && selectedItems.some(s => s.path === entry.path)) {
                     card.classList.add('selected');
                 } else {
                     card.classList.remove('selected');
                 }
             });
-            const count = selectedFiles.length;
+            const count = selectedItems.length;
             statusCount.textContent = count > 0
-                ? `${count} selecionado${count > 1 ? 's' : ''} de ${totalFiles}`
-                : `${totalFiles} item${totalFiles !== 1 ? 's' : ''}`;
+                ? `${count} selecionado${count > 1 ? 's' : ''} de ${totalItems}`
+                : `${totalItems} ${totalItems !== 1 ? 'itens' : 'item'}`;
         }
 
-        function handleCardClick(e, file, index) {
+        function handleCardClick(e, entry, index) {
             if (e.ctrlKey || e.metaKey) {
-                // Toggle selection
-                const idx = selectedFiles.findIndex(f => f.filename === file.filename);
-                if (idx > -1) selectedFiles.splice(idx, 1);
-                else selectedFiles.push(file);
+                const idx = selectedItems.findIndex(s => s.path === entry.path);
+                if (idx > -1) selectedItems.splice(idx, 1);
+                else selectedItems.push(entry);
                 lastClickedIndex = index;
             } else if (e.shiftKey && lastClickedIndex > -1) {
-                // Range selection
                 const start = Math.min(lastClickedIndex, index);
                 const end = Math.max(lastClickedIndex, index);
-                const range = allLoadedFiles.slice(start, end + 1);
-                // Merge with existing
-                range.forEach(f => {
-                    if (!selectedFiles.some(sf => sf.filename === f.filename)) {
-                        selectedFiles.push(f);
-                    }
+                allLoadedEntries.slice(start, end + 1).forEach(en => {
+                    if (!selectedItems.some(s => s.path === en.path)) selectedItems.push(en);
                 });
             } else {
-                // Single select
-                selectedFiles = [file];
+                selectedItems = [entry];
                 lastClickedIndex = index;
             }
             updateSelectionUI();
         }
 
-        function showContextMenu(e, file) {
+        function showCtx(id, on) { document.getElementById(id).style.display = on ? '' : 'none'; }
+
+        function showContextMenu(e, entry) {
             e.preventDefault();
-            // If right-clicked file is not in selection, select only it
-            if (!selectedFiles.some(sf => sf.filename === file.filename)) {
-                selectedFiles = [file];
+            if (!selectedItems.some(s => s.path === entry.path)) {
+                selectedItems = [entry];
                 updateSelectionUI();
             }
-            contextMenu.style.left = Math.min(e.clientX, window.innerWidth - 180) + 'px';
-            contextMenu.style.top = Math.min(e.clientY, window.innerHeight - 200) + 'px';
+            contextMenu.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
+            contextMenu.style.top = Math.min(e.clientY, window.innerHeight - 280) + 'px';
             contextMenu.classList.add('visible');
 
-            // Show/hide items based on selection count
-            const count = selectedFiles.length;
-            const isText = count === 1 && isTextFile(selectedFiles[0].displayName);
-            document.getElementById('ctxView').style.display = isText ? '' : 'none';
-            document.getElementById('ctxDownload').style.display = count === 1 ? '' : 'none';
-            document.getElementById('ctxCopyName').style.display = count === 1 ? '' : 'none';
+            const count = selectedItems.length;
+            const only = count === 1 ? selectedItems[0] : null;
+            const isFolder = only && only.type === 'folder';
+            const k = only && only.type === 'file' ? entryKind(only) : null;
+            const isMedia = k === 'video' || k === 'audio' || k === 'image';
+            const isText = only && only.type === 'file' && isTextFile(only.name);
+
+            showCtx('ctxView', !!isText);
+            showCtx('ctxPlay', !!isMedia);
+            showCtx('ctxDownload', count === 1 && !isFolder);
+            showCtx('ctxRename', count === 1);
+            showCtx('ctxMove', count >= 1);
+            showCtx('ctxCopyName', count === 1);
             document.getElementById('ctxDownloadZip').textContent = count > 1
-                ? `📦 Baixar ${count} arquivos como ZIP`
+                ? `📦 Baixar ${count} itens como ZIP`
                 : '📦 Baixar como ZIP';
             document.getElementById('ctxDelete').textContent = count > 1
-                ? `🗑 Excluir ${count} arquivos`
+                ? `🗑 Excluir ${count} itens`
                 : '🗑 Excluir';
         }
 
         document.getElementById('ctxView').onclick = () => {
             contextMenu.classList.remove('visible');
-            if (selectedFiles.length === 1) openViewer(selectedFiles[0]);
+            if (selectedItems.length === 1) openViewer(selectedItems[0]);
+        };
+
+        document.getElementById('ctxPlay').onclick = () => {
+            contextMenu.classList.remove('visible');
+            if (selectedItems.length === 1) openMedia(selectedItems[0]);
         };
 
         document.getElementById('ctxDownload').onclick = () => {
-            if (selectedFiles.length === 1) {
-                const a = document.createElement('a');
-                a.href = '/download/' + encodeURIComponent(selectedFiles[0].filename) + '?token=' + ACCESS_TOKEN;
-                a.download = selectedFiles[0].displayName;
-                a.click();
+            if (selectedItems.length === 1 && selectedItems[0].type === 'file') {
+                triggerDownload(selectedItems[0]);
             }
             contextMenu.classList.remove('visible');
         };
 
         document.getElementById('ctxDownloadZip').onclick = async () => {
             contextMenu.classList.remove('visible');
-            const filenames = getSelectedFilenames();
+            const paths = getSelectedPaths();
             try {
                 const response = await fetch('/api/download-zip', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-access-token': ACCESS_TOKEN },
-                    body: JSON.stringify({ files: filenames })
+                    headers: jsonHeaders(),
+                    body: JSON.stringify({ paths })
                 });
+                if (!response.ok) throw new Error('HTTP ' + response.status);
                 const blob = await response.blob();
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = 'wifi-drive-files.zip';
+                a.download = 'wifi-drive.zip';
                 a.click();
                 URL.revokeObjectURL(url);
             } catch (err) {
                 console.error('Erro ao baixar ZIP:', err);
+                showToast({ type: 'delete', icon: '⚠', title: 'Falha ao baixar ZIP' });
             }
         };
 
+        document.getElementById('ctxRename').onclick = () => {
+            contextMenu.classList.remove('visible');
+            if (selectedItems.length === 1) renameItem(selectedItems[0]);
+        };
+
+        document.getElementById('ctxMove').onclick = () => {
+            contextMenu.classList.remove('visible');
+            if (selectedItems.length >= 1) openMovePicker();
+        };
+
         document.getElementById('ctxCopyName').onclick = () => {
-            if (selectedFiles.length === 1) {
-                navigator.clipboard.writeText(selectedFiles[0].displayName);
+            if (selectedItems.length === 1) {
+                navigator.clipboard.writeText(selectedItems[0].name);
             }
             contextMenu.classList.remove('visible');
         };
 
         document.getElementById('ctxDelete').onclick = async () => {
             contextMenu.classList.remove('visible');
-            const count = selectedFiles.length;
-            if (!confirm(`Excluir ${count} arquivo${count > 1 ? 's' : ''}? Esta ação não pode ser desfeita.`)) return;
+            const count = selectedItems.length;
+            if (!confirm(`Excluir ${count} ${count > 1 ? 'itens' : 'item'}? Esta ação não pode ser desfeita.`)) return;
 
             try {
                 await fetch('/api/delete', {
                     method: 'POST',
-                    headers: { 'Content-Type': 'application/json', 'x-access-token': ACCESS_TOKEN },
-                    body: JSON.stringify({ files: getSelectedFilenames(), clientId: CLIENT_ID })
+                    headers: jsonHeaders(),
+                    body: JSON.stringify({ paths: getSelectedPaths(), clientId: CLIENT_ID })
                 });
-                selectedFiles = [];
+                selectedItems = [];
                 resetAndLoadFiles();
             } catch (err) {
                 console.error('Erro ao excluir:', err);
             }
         };
 
-        // --- Upload ---
+        // --- Upload (queued with a small concurrency limit) ---
+        const UPLOAD_CONCURRENCY = 4;
+        let uploadQueue = [];
+        let activeUploads = 0;
 
         function handleFiles(files) {
             if (!files || files.length === 0) return;
-            Array.from(files).forEach(file => uploadFile(file));
+            enqueueUploads(Array.from(files).map(f => ({ file: f, relPath: '' })));
         }
 
-        function uploadFile(file) {
+        function enqueueUploads(jobs) {
+            if (!jobs || jobs.length === 0) return;
+            if (jobs.length > 500 && !confirm(`Enviar ${jobs.length} arquivos?`)) return;
+            uploadQueue.push(...jobs);
+            pumpUploads();
+        }
+
+        function pumpUploads() {
+            while (activeUploads < UPLOAD_CONCURRENCY && uploadQueue.length) {
+                const job = uploadQueue.shift();
+                activeUploads++;
+                uploadFile(job.file, job.relPath || '', () => {
+                    activeUploads--;
+                    if (uploadQueue.length === 0 && activeUploads === 0) resetAndLoadFiles();
+                    else pumpUploads();
+                });
+            }
+        }
+
+        function uploadFile(file, relPath, done) {
             const id = 'up-' + Date.now() + '-' + Math.random().toString(36).substr(2, 5);
 
             const item = document.createElement('div');
             item.className = 'progress-item';
             item.id = id;
             item.innerHTML = `
-                <span class="progress-item-name">${file.name}</span>
+                <span class="progress-item-name"></span>
                 <div class="progress-bar-track"><div class="progress-bar-fill"></div></div>
                 <span class="progress-item-percent">0%</span>
             `;
+            item.querySelector('.progress-item-name').textContent = relPath ? relPath + '/' + file.name : file.name;
             progressContainer.appendChild(item);
 
             const formData = new FormData();
             formData.append('files', file);
 
+            const qs = new URLSearchParams({ token: ACCESS_TOKEN, clientId: CLIENT_ID, path: currentPath });
+            if (relPath) qs.set('relPath', relPath);
+
             const xhr = new XMLHttpRequest();
-            xhr.open('POST', '/api/upload?token=' + ACCESS_TOKEN + '&clientId=' + encodeURIComponent(CLIENT_ID));
+            xhr.open('POST', '/api/upload?' + qs.toString());
 
             xhr.upload.onprogress = (e) => {
                 if (e.lengthComputable) {
@@ -1327,19 +1624,20 @@
                     fill.style.width = '100%';
                     fill.classList.add('complete');
                     pctLabel.textContent = '✓';
-                    setTimeout(() => { item.style.opacity = '0'; setTimeout(() => item.remove(), 300); }, 1500);
-                    resetAndLoadFiles();
+                    setTimeout(() => { item.style.opacity = '0'; setTimeout(() => item.remove(), 300); }, 1200);
                 } else {
                     fill.classList.add('error');
                     pctLabel.textContent = '✗';
                     setTimeout(() => item.remove(), 4000);
                 }
+                if (done) done();
             };
 
             xhr.onerror = () => {
                 item.querySelector('.progress-bar-fill').classList.add('error');
                 item.querySelector('.progress-item-percent').textContent = '✗';
                 setTimeout(() => item.remove(), 4000);
+                if (done) done();
             };
 
             xhr.send(formData);
@@ -1350,27 +1648,100 @@
             fileInput.value = '';
         });
 
-        // Drag & drop on whole page
+        // Upload an entire folder from the device (preserve structure via webkitRelativePath)
+        folderInput.addEventListener('change', () => {
+            const files = Array.from(folderInput.files);
+            const jobs = files.map(f => {
+                const rel = f.webkitRelativePath || f.name;
+                const dir = rel.includes('/') ? rel.slice(0, rel.lastIndexOf('/')) : '';
+                return { file: f, relPath: dir };
+            });
+            enqueueUploads(jobs);
+            folderInput.value = '';
+        });
+
+        async function createFolder() {
+            const name = prompt('Nome da nova pasta:');
+            if (!name) return;
+            if (/[\/\\]/.test(name)) { alert('O nome não pode conter / ou \\'); return; }
+            try {
+                const r = await fetch('/api/folder', {
+                    method: 'POST',
+                    headers: jsonHeaders(),
+                    body: JSON.stringify({ path: currentPath, name, clientId: CLIENT_ID })
+                });
+                if (!r.ok) {
+                    const d = await r.json().catch(() => ({}));
+                    alert(d.error || 'Falha ao criar pasta');
+                    return;
+                }
+                resetAndLoadFiles();
+            } catch (err) {
+                alert('Erro ao criar pasta.');
+            }
+        }
+
+        // Drag & drop on whole page (external files/folders -> upload)
         let dragCounter = 0;
         document.addEventListener('dragenter', (e) => {
+            if (isInternalDrag) return;
             e.preventDefault();
             dragCounter++;
             dropOverlay.classList.add('visible');
         });
         document.addEventListener('dragleave', (e) => {
+            if (isInternalDrag) return;
             e.preventDefault();
             dragCounter--;
             if (dragCounter <= 0) { dropOverlay.classList.remove('visible'); dragCounter = 0; }
         });
-        document.addEventListener('dragover', (e) => e.preventDefault());
-        document.addEventListener('drop', (e) => {
+        document.addEventListener('dragover', (e) => { if (!isInternalDrag) e.preventDefault(); });
+        document.addEventListener('drop', async (e) => {
+            if (isInternalDrag) return;
             e.preventDefault();
             dragCounter = 0;
             dropOverlay.classList.remove('visible');
-            handleFiles(e.dataTransfer.files);
+            const dt = e.dataTransfer;
+            const hasEntryApi = dt.items && dt.items.length && typeof dt.items[0].webkitGetAsEntry === 'function';
+            if (hasEntryApi) {
+                // Collect entry objects SYNCHRONOUSLY (DataTransfer empties after this tick)
+                const roots = [];
+                let sawDir = false;
+                for (let i = 0; i < dt.items.length; i++) {
+                    const en = dt.items[i].webkitGetAsEntry && dt.items[i].webkitGetAsEntry();
+                    if (en) { roots.push(en); if (en.isDirectory) sawDir = true; }
+                }
+                if (!roots.length || !sawDir) { handleFiles(dt.files); return; }
+                const out = [];
+                await Promise.all(roots.map(en => walkEntry(en, '', out)));
+                enqueueUploads(out);
+            } else {
+                handleFiles(dt.files);
+            }
         });
 
-        // --- File List ---
+        // Recursively read a dropped DirectoryEntry/FileEntry into {file, relPath} jobs
+        function walkEntry(entry, parentRel, out) {
+            if (entry.isFile) {
+                return new Promise(resolve => {
+                    entry.file(file => { out.push({ file, relPath: parentRel }); resolve(); }, () => resolve());
+                });
+            }
+            if (entry.isDirectory) {
+                const dirRel = parentRel ? parentRel + '/' + entry.name : entry.name;
+                const reader = entry.createReader();
+                const readBatch = () => new Promise(resolve => {
+                    reader.readEntries(batch => {
+                        if (!batch.length) return resolve();
+                        Promise.all(batch.map(ch => walkEntry(ch, dirRel, out))).then(() => readBatch().then(resolve));
+                    }, () => resolve());
+                });
+                return readBatch();
+            }
+            return Promise.resolve();
+        }
+
+        // --- File List & navigation ---
 
         async function loadFiles(append = false) {
             if (isLoading) return;
@@ -1379,6 +1750,7 @@
 
             try {
                 const params = new URLSearchParams({
+                    path: currentPath,
                     offset: currentOffset,
                     limit: PAGE_SIZE,
                     sort: currentSort,
@@ -1387,76 +1759,96 @@
                 if (searchTerm) params.set('search', searchTerm);
 
                 const response = await fetch('/api/files?' + params.toString());
+                if (!response.ok) {
+                    // Folder gone (e.g. deleted elsewhere): fall back to root
+                    if (response.status === 404 && currentPath) {
+                        currentPath = '';
+                        if (!suppressHashSync) setHash('');
+                        currentOffset = 0;
+                        isLoading = false;
+                        loadingIndicator.classList.remove('visible');
+                        return loadFiles(false);
+                    }
+                    throw new Error('HTTP ' + response.status);
+                }
                 const data = await response.json();
 
                 if (!append) {
                     fileGrid.innerHTML = '';
-                    allLoadedFiles = [];
+                    allLoadedEntries = [];
                 }
 
-                totalFiles = data.total;
-                hasMore = data.hasMore;
-                statusCount.textContent = `${totalFiles} item${totalFiles !== 1 ? 's' : ''}`;
+                // Reconcile path/breadcrumb from the server (handles normalization)
+                currentPath = data.path || '';
+                currentBreadcrumb = data.breadcrumb || [{ name: 'Compartilhados', path: '' }];
+                renderBreadcrumb();
 
-                if (data.files.length === 0 && currentOffset === 0) {
+                totalItems = data.total;
+                hasMore = data.hasMore;
+                statusCount.textContent = `${totalItems} ${totalItems !== 1 ? 'itens' : 'item'}`;
+
+                const entries = data.entries || [];
+                if (entries.length === 0 && currentOffset === 0) {
                     fileGrid.innerHTML = `
                         <div class="empty-state" style="grid-column: 1/-1">
                             <div class="empty-state-icon">📂</div>
-                            <div class="empty-state-text">${searchTerm ? 'Nenhum arquivo encontrado.' : 'Pasta vazia — arraste arquivos ou clique em Upload.'}</div>
+                            <div class="empty-state-text">${searchTerm ? 'Nenhum item encontrado.' : 'Pasta vazia — arraste arquivos, envie uma pasta ou crie uma nova.'}</div>
                         </div>
                     `;
                     return;
                 }
 
-                data.files.forEach(file => {
-                    const index = allLoadedFiles.length;
-                    allLoadedFiles.push(file);
-
-                    const card = document.createElement('div');
-                    card.className = 'file-card';
-                    if (selectedFiles.some(sf => sf.filename === file.filename)) {
-                        card.classList.add('selected');
-                    }
-                    if (recentlyAddedNames.has(file.displayName)) {
-                        card.classList.add('new-arrival');
-                        recentlyAddedNames.delete(file.displayName);
-                        // Strip the class after the animation completes so re-renders don't replay it
-                        setTimeout(() => card.classList.remove('new-arrival'), 1900);
-                    }
-                    const safeName = escapeHtml(file.displayName);
-                    card.innerHTML = `
-                        <div class="file-card-icon">${getFileIcon(file.displayName)}</div>
-                        <div class="file-card-name" title="${safeName}">${safeName}</div>
-                        <div class="file-card-meta">
-                            <span>${formatDateFull(file.createdAt)}</span>
-                            <span>${formatFileSize(file.size)}</span>
-                        </div>
-                    `;
-
-                    card.addEventListener('dblclick', () => {
-                        if (isTextFile(file.displayName)) {
-                            openViewer(file);
-                            return;
-                        }
-                        const a = document.createElement('a');
-                        a.href = '/download/' + encodeURIComponent(file.filename) + '?token=' + ACCESS_TOKEN;
-                        a.download = file.displayName;
-                        a.click();
-                    });
-
-                    card.addEventListener('contextmenu', (e) => showContextMenu(e, file));
-                    card.addEventListener('click', (e) => handleCardClick(e, file, index));
-
-                    fileGrid.appendChild(card);
+                entries.forEach(entry => {
+                    const index = allLoadedEntries.length;
+                    allLoadedEntries.push(entry);
+                    fileGrid.appendChild(buildCard(entry, index));
                 });
 
-                currentOffset += data.files.length;
+                currentOffset += entries.length;
             } catch (error) {
-                console.error('Erro ao carregar arquivos:', error);
+                console.error('Erro ao carregar:', error);
             } finally {
                 isLoading = false;
                 loadingIndicator.classList.remove('visible');
             }
+        }
+
+        function buildCard(entry, index) {
+            const isFolder = entry.type === 'folder';
+            const card = document.createElement('div');
+            card.className = 'file-card' + (isFolder ? ' folder' : '');
+            card.draggable = true;
+            card.dataset.path = entry.path;
+            card.dataset.type = entry.type;
+            if (selectedItems.some(s => s.path === entry.path)) card.classList.add('selected');
+            if (recentlyAddedPaths.has(entry.path)) {
+                card.classList.add('new-arrival');
+                recentlyAddedPaths.delete(entry.path);
+                setTimeout(() => card.classList.remove('new-arrival'), 1900);
+            }
+            const safeName = escapeHtml(entry.name);
+            const meta = isFolder
+                ? `<div class="file-card-meta"><span>${formatDateFull(entry.mtime)}</span><span>—</span></div>`
+                : `<div class="file-card-meta"><span>${formatDateFull(entry.mtime)}</span><span>${formatFileSize(entry.size)}</span></div>`;
+            card.innerHTML = `
+                <div class="file-card-icon">${getEntryIcon(entry)}</div>
+                <div class="file-card-name" title="${safeName}">${safeName}</div>
+                ${meta}
+            `;
+
+            card.addEventListener('dblclick', () => openEntry(entry));
+            card.addEventListener('contextmenu', (e) => showContextMenu(e, entry));
+            card.addEventListener('click', (e) => handleCardClick(e, entry, index));
+
+            // Internal drag-to-folder move
+            card.addEventListener('dragstart', (e) => onCardDragStart(e, entry));
+            card.addEventListener('dragend', onCardDragEnd);
+            if (isFolder) {
+                card.addEventListener('dragover', (e) => { if (isInternalDrag) { e.preventDefault(); card.classList.add('drop-target'); } });
+                card.addEventListener('dragleave', () => card.classList.remove('drop-target'));
+                card.addEventListener('drop', (e) => onCardDrop(e, entry));
+            }
+            return card;
         }
 
         function resetAndLoadFiles() {
@@ -1465,8 +1857,107 @@
             loadFiles(false);
         }
 
+        // --- Folder navigation ---
+        function navigateTo(p) {
+            currentPath = p || '';
+            selectedItems = [];
+            lastClickedIndex = -1;
+            currentOffset = 0;
+            hasMore = true;
+            searchInput.value = '';
+            searchTerm = '';
+            if (!suppressHashSync) setHash(currentPath);
+            fileArea.scrollTop = 0;
+            loadFiles(false);
+        }
+        function navigateUp() {
+            if (!currentPath) return;
+            const i = currentPath.lastIndexOf('/');
+            navigateTo(i < 0 ? '' : currentPath.slice(0, i));
+        }
+        function setHash(p) { location.hash = p ? encodeURIComponent(p) : ''; }
+        function decodeHash() { try { return decodeURIComponent((location.hash || '').slice(1)); } catch { return ''; } }
+
+        function renderBreadcrumb() {
+            const seg = document.getElementById('pathSegments');
+            seg.innerHTML = '';
+            const crumbs = (currentBreadcrumb && currentBreadcrumb.length) ? currentBreadcrumb : [{ name: 'Compartilhados', path: '' }];
+            crumbs.forEach((c, i) => {
+                if (i > 0) {
+                    const sep = document.createElement('span');
+                    sep.className = 'path-separator';
+                    sep.textContent = '›';
+                    seg.appendChild(sep);
+                }
+                const el = document.createElement('span');
+                const isLast = i === crumbs.length - 1;
+                el.className = 'path-segment' + (isLast ? ' current' : ' clickable');
+                el.textContent = (i === 0 ? '📶 ' : '') + c.name;
+                if (!isLast) el.onclick = () => navigateTo(c.path);
+                seg.appendChild(el);
+            });
+            document.getElementById('pathUpBtn').style.visibility = currentPath ? 'visible' : 'hidden';
+        }
+
+        window.addEventListener('hashchange', () => {
+            const fromHash = decodeHash();
+            if (fromHash === currentPath) return;
+            suppressHashSync = true;
+            navigateTo(fromHash);
+            suppressHashSync = false;
+        });
+
+        // --- Move (drag a card onto a folder card, or via the picker) ---
+        function onCardDragStart(e, entry) {
+            if (!selectedItems.some(s => s.path === entry.path)) {
+                selectedItems = [entry];
+                updateSelectionUI();
+            }
+            isInternalDrag = true;
+            internalDragPaths = getSelectedPaths();
+            try {
+                e.dataTransfer.effectAllowed = 'move';
+                e.dataTransfer.setData('text/plain', internalDragPaths.join('\n'));
+            } catch {}
+        }
+        function onCardDragEnd() {
+            isInternalDrag = false;
+            internalDragPaths = [];
+            document.querySelectorAll('.file-card.drop-target').forEach(c => c.classList.remove('drop-target'));
+        }
+        async function onCardDrop(e, folderEntry) {
+            e.preventDefault();
+            e.stopPropagation();
+            document.querySelectorAll('.file-card.drop-target').forEach(c => c.classList.remove('drop-target'));
+            if (!isInternalDrag) return;
+            const paths = internalDragPaths.filter(p => p !== folderEntry.path && !folderEntry.path.startsWith(p + '/'));
+            if (!paths.length) return;
+            await doMove(paths, folderEntry.path);
+        }
+        async function doMove(paths, dest) {
+            try {
+                const r = await fetch('/api/move', {
+                    method: 'POST',
+                    headers: jsonHeaders(),
+                    body: JSON.stringify({ paths, dest, clientId: CLIENT_ID })
+                });
+                if (!r.ok) {
+                    const d = await r.json().catch(() => ({}));
+                    showToast({ type: 'delete', icon: '⚠', title: 'Falha ao mover', detail: d.error || '' });
+                    return;
+                }
+                const d = await r.json().catch(() => ({}));
+                if (d.errors && d.errors.length) {
+                    showToast({ type: 'delete', icon: '⚠', title: 'Alguns itens não foram movidos' });
+                }
+                selectedItems = [];
+                resetAndLoadFiles();
+            } catch (err) {
+                showToast({ type: 'delete', icon: '⚠', title: 'Erro ao mover' });
+            }
+        }
+
         // Infinite scroll
-        const fileArea = document.getElementById('fileArea');
         fileArea.addEventListener('scroll', () => {
             if (fileArea.scrollTop + fileArea.clientHeight >= fileArea.scrollHeight - 200) {
                 if (hasMore && !isLoading) loadFiles(true);
@@ -1543,11 +2034,11 @@
             viewerGutter.textContent = '';
         }
 
-        async function openViewer(file) {
-            viewerCurrentFile = file;
-            viewerName.textContent = file.displayName;
-            viewerIcon.textContent = getFileIcon(file.displayName);
-            viewerMeta.textContent = formatFileSize(file.size);
+        async function openViewer(entry) {
+            viewerCurrentFile = entry;
+            viewerName.textContent = entry.name;
+            viewerIcon.textContent = getFileIcon(entry.name);
+            viewerMeta.textContent = formatFileSize(entry.size);
             viewerStats.textContent = '';
             viewerSearch.value = '';
             viewerSearchInfo.textContent = '';
@@ -1563,7 +2054,7 @@
             viewerBackdrop.classList.add('visible');
 
             try {
-                const resp = await fetch('/api/text/' + encodeURIComponent(file.filename) + '?token=' + ACCESS_TOKEN);
+                const resp = await fetch('/api/text?path=' + encodeURIComponent(entry.path) + '&token=' + ACCESS_TOKEN);
                 let data = {};
                 try { data = await resp.json(); } catch {}
                 if (!resp.ok) {
@@ -1593,8 +2084,8 @@
                 const action = document.createElement('a');
                 action.className = 'viewer-error-action';
                 action.textContent = '⬇ Baixar arquivo';
-                action.href = '/download/' + encodeURIComponent(viewerCurrentFile.filename) + '?token=' + ACCESS_TOKEN;
-                action.download = viewerCurrentFile.displayName;
+                action.href = downloadUrl(viewerCurrentFile);
+                action.download = viewerCurrentFile.name;
                 wrap.appendChild(document.createElement('br'));
                 wrap.appendChild(action);
             }
@@ -1707,10 +2198,7 @@
 
         document.getElementById('viewerDownload').onclick = () => {
             if (!viewerCurrentFile) return;
-            const a = document.createElement('a');
-            a.href = '/download/' + encodeURIComponent(viewerCurrentFile.filename) + '?token=' + ACCESS_TOKEN;
-            a.download = viewerCurrentFile.displayName;
-            a.click();
+            triggerDownload(viewerCurrentFile);
         };
 
         document.addEventListener('keydown', (e) => {
@@ -1728,6 +2216,194 @@
             }
         });
 
+        // --- Media player (video / audio / image) ---
+        const mediaBackdrop = document.getElementById('mediaBackdrop');
+        const mediaBody = document.getElementById('mediaBody');
+        const mediaName = document.getElementById('mediaName');
+        const mediaIcon = document.getElementById('mediaIcon');
+        let mediaCurrentEntry = null;
+
+        function openMedia(entry) {
+            mediaCurrentEntry = entry;
+            mediaName.textContent = entry.name;
+            mediaIcon.textContent = getEntryIcon(entry);
+            mediaBody.innerHTML = '';
+            const url = mediaUrl(entry);
+            const k = entryKind(entry);
+            const ext = extOf(entry.name);
+
+            if (k === 'image' && !UNSUPPORTED_PLAY.has(ext)) {
+                const img = document.createElement('img');
+                img.className = 'media-img';
+                img.src = url;
+                img.alt = entry.name;
+                img.onerror = () => showMediaUnsupported(entry);
+                mediaBody.appendChild(img);
+            } else if (k === 'video' && !UNSUPPORTED_PLAY.has(ext)) {
+                const v = document.createElement('video');
+                v.className = 'media-video';
+                v.controls = true;
+                v.autoplay = true;
+                v.src = url;
+                v.onerror = () => showMediaUnsupported(entry);
+                mediaBody.appendChild(v);
+            } else if (k === 'audio' && !UNSUPPORTED_PLAY.has(ext)) {
+                const a = document.createElement('audio');
+                a.className = 'media-audio';
+                a.controls = true;
+                a.autoplay = true;
+                a.src = url;
+                a.onerror = () => showMediaUnsupported(entry);
+                mediaBody.appendChild(a);
+            } else {
+                showMediaUnsupported(entry);
+            }
+            mediaBackdrop.classList.add('visible');
+        }
+
+        function showMediaUnsupported(entry) {
+            mediaBody.innerHTML = '';
+            const box = document.createElement('div');
+            box.className = 'media-unsupported';
+            box.textContent = 'Formato não suportado para reprodução no navegador — baixe o arquivo.';
+            const a = document.createElement('a');
+            a.className = 'viewer-error-action';
+            a.textContent = '⬇ Baixar arquivo';
+            a.href = downloadUrl(entry);
+            a.download = entry.name;
+            box.appendChild(document.createElement('br'));
+            box.appendChild(a);
+            mediaBody.appendChild(box);
+        }
+
+        function closeMedia() {
+            const el = mediaBody.querySelector('video, audio');
+            if (el) { try { el.pause(); } catch {} el.removeAttribute('src'); try { el.load(); } catch {} }
+            mediaBody.innerHTML = '';
+            mediaCurrentEntry = null;
+            mediaBackdrop.classList.remove('visible');
+        }
+
+        document.getElementById('mediaClose').onclick = closeMedia;
+        mediaBackdrop.addEventListener('click', (e) => { if (e.target === mediaBackdrop) closeMedia(); });
+        document.getElementById('mediaDownload').onclick = () => { if (mediaCurrentEntry) triggerDownload(mediaCurrentEntry); };
+
+        // --- Rename ---
+        async function renameItem(entry) {
+            const proposed = prompt('Novo nome:', entry.name);
+            if (!proposed || proposed === entry.name) return;
+            if (/[\/\\]/.test(proposed)) { alert('O nome não pode conter / ou \\'); return; }
+            try {
+                const r = await fetch('/api/rename', {
+                    method: 'POST',
+                    headers: jsonHeaders(),
+                    body: JSON.stringify({ path: entry.path, newName: proposed, clientId: CLIENT_ID })
+                });
+                if (!r.ok) {
+                    const d = await r.json().catch(() => ({}));
+                    showToast({ type: 'delete', icon: '⚠', title: 'Falha ao renomear', detail: d.error || '' });
+                    return;
+                }
+                selectedItems = [];
+                resetAndLoadFiles();
+            } catch (err) {
+                showToast({ type: 'delete', icon: '⚠', title: 'Erro ao renomear' });
+            }
+        }
+
+        // --- Move picker (navigate folders only, choose a destination) ---
+        const pickerBackdrop = document.getElementById('pickerBackdrop');
+        let pickerPath = '';
+        let moveBatch = [];
+
+        function openMovePicker() {
+            moveBatch = selectedItems.slice();
+            if (!moveBatch.length) return;
+            pickerPath = '';
+            pickerBackdrop.classList.add('visible');
+            loadPickerLevel();
+        }
+        function closeMovePicker() {
+            pickerBackdrop.classList.remove('visible');
+            moveBatch = [];
+        }
+        async function loadPickerLevel() {
+            const params = new URLSearchParams({ path: pickerPath, offset: 0, limit: 1000, sort: 'name-asc', foldersOnly: '1', token: ACCESS_TOKEN });
+            let data = { entries: [], breadcrumb: [{ name: 'Compartilhados', path: '' }] };
+            try {
+                const resp = await fetch('/api/files?' + params.toString());
+                if (resp.ok) data = await resp.json();
+            } catch {}
+            pickerPath = data.path || '';
+            renderPickerBreadcrumb(data.breadcrumb || [{ name: 'Compartilhados', path: '' }]);
+            const list = document.getElementById('pickerList');
+            list.innerHTML = '';
+            if (pickerPath) {
+                list.appendChild(pickerRow('⬆ ..', () => {
+                    const i = pickerPath.lastIndexOf('/');
+                    pickerPath = i < 0 ? '' : pickerPath.slice(0, i);
+                    loadPickerLevel();
+                }, false));
+            }
+            const movingPaths = new Set(moveBatch.map(e => e.path));
+            const folders = (data.entries || []).filter(e => e.type === 'folder');
+            folders.forEach(f => {
+                const disabled = movingPaths.has(f.path);
+                list.appendChild(pickerRow('📁 ' + f.name, disabled ? null : () => { pickerPath = f.path; loadPickerLevel(); }, disabled));
+            });
+            if (!folders.length) {
+                const empty = document.createElement('div');
+                empty.className = 'picker-empty';
+                empty.textContent = 'Sem subpastas aqui.';
+                list.appendChild(empty);
+            }
+            document.getElementById('pickerDest').textContent = 'Destino: ' + (pickerPath ? '/' + pickerPath : 'Compartilhados');
+        }
+        function pickerRow(label, onClick, disabled) {
+            const row = document.createElement('div');
+            row.className = 'picker-row' + (disabled ? ' disabled' : '');
+            row.textContent = label;
+            if (onClick && !disabled) row.onclick = onClick;
+            return row;
+        }
+        function renderPickerBreadcrumb(crumbs) {
+            const bc = document.getElementById('pickerBreadcrumb');
+            bc.innerHTML = '';
+            crumbs.forEach((c, i) => {
+                if (i > 0) {
+                    const s = document.createElement('span');
+                    s.textContent = '›';
+                    bc.appendChild(s);
+                }
+                const el = document.createElement('span');
+                el.className = 'crumb';
+                el.textContent = c.name;
+                el.onclick = () => { pickerPath = c.path; loadPickerLevel(); };
+                bc.appendChild(el);
+            });
+        }
+        document.getElementById('pickerConfirm').onclick = async () => {
+            const paths = moveBatch.map(e => e.path);
+            for (const p of paths) {
+                if (pickerPath === p || pickerPath.startsWith(p + '/')) {
+                    alert('Não é possível mover uma pasta para dentro dela mesma.');
+                    return;
+                }
+            }
+            await doMove(paths, pickerPath);
+            closeMovePicker();
+        };
+        document.getElementById('pickerCancel').onclick = closeMovePicker;
+        document.getElementById('pickerClose').onclick = closeMovePicker;
+        pickerBackdrop.addEventListener('click', (e) => { if (e.target === pickerBackdrop) closeMovePicker(); });
+
+        // Esc closes the media player / move picker (the text viewer has its own handler)
+        document.addEventListener('keydown', (e) => {
+            if (e.key !== 'Escape') return;
+            if (pickerBackdrop.classList.contains('visible')) { closeMovePicker(); return; }
+            if (mediaBackdrop.classList.contains('visible')) { closeMedia(); return; }
+        });
+
         // --- Realtime sync via Server-Sent Events ---
         let evtSource = null;
         let reloadDebounce = null;
@@ -1739,6 +2415,8 @@
             clearTimeout(reloadDebounce);
             reloadDebounce = setTimeout(() => resetAndLoadFiles(), 500);
         }
+
+        function parentOf(p) { const i = (p || '').lastIndexOf('/'); return i < 0 ? '' : p.slice(0, i); }
 
         function closeEvents() {
             evtClosed = true;
@@ -1761,27 +2439,49 @@
                 evtSource.addEventListener('files-changed', (e) => {
                     let payload = {};
                     try { payload = JSON.parse(e.data || '{}'); } catch {}
-                    const files = Array.isArray(payload.files) ? payload.files : [];
-                    const names = files.map(f => f && (f.displayName || f.filename)).filter(Boolean);
-                    const count = payload.count || names.length || 0;
+                    const action = payload.action;
+                    let affectsCurrent = false;
+                    const names = [];
 
-                    if (payload.action === 'upload') {
-                        names.forEach(n => recentlyAddedNames.add(n));
+                    if (action === 'upload') {
+                        affectsCurrent = (payload.path || '') === currentPath;
+                        (payload.files || []).forEach(f => {
+                            if (f.path) recentlyAddedPaths.add(f.path);
+                            if (f.name) names.push(f.name);
+                        });
+                        const count = payload.count || names.length || 0;
                         showToast({
-                            type: 'upload',
-                            icon: '📥',
+                            type: 'upload', icon: '📥',
                             title: count > 1 ? `${count} arquivos enviados de outro dispositivo` : 'Novo arquivo de outro dispositivo',
                             detail: names.join(', ')
                         });
-                    } else if (payload.action === 'delete') {
+                    } else if (action === 'delete') {
+                        const items = payload.items || [];
+                        affectsCurrent = items.some(it => parentOf(it.path) === currentPath);
+                        items.forEach(it => { if (it.name) names.push(it.name); });
+                        const count = payload.count || items.length || 0;
                         showToast({
-                            type: 'delete',
-                            icon: '🗑',
-                            title: count > 1 ? `${count} arquivos removidos de outro dispositivo` : 'Arquivo removido de outro dispositivo',
+                            type: 'delete', icon: '🗑',
+                            title: count > 1 ? `${count} itens removidos de outro dispositivo` : 'Item removido de outro dispositivo',
                             detail: names.join(', ')
                         });
+                    } else if (action === 'mkdir') {
+                        affectsCurrent = (payload.path || '') === currentPath;
+                        if (payload.itemPath) recentlyAddedPaths.add(payload.itemPath);
+                        showToast({ type: 'upload', icon: '📁', title: 'Nova pasta criada em outro dispositivo', detail: payload.name || '' });
+                    } else if (action === 'move') {
+                        const items = payload.items || [];
+                        affectsCurrent = (payload.destPath || '') === currentPath || items.some(it => it.fromParent === currentPath);
+                        items.forEach(it => { if (it.to) recentlyAddedPaths.add(it.to); });
+                        const count = payload.count || items.length || 0;
+                        showToast({ type: 'upload', icon: '📂', title: count > 1 ? `${count} itens movidos em outro dispositivo` : 'Item movido em outro dispositivo' });
+                    } else if (action === 'rename') {
+                        affectsCurrent = (payload.parent || '') === currentPath;
+                        if (payload.to) recentlyAddedPaths.add(payload.to);
+                        showToast({ type: 'upload', icon: '✏', title: 'Item renomeado em outro dispositivo' });
                     }
-                    scheduleReload();
+
+                    if (affectsCurrent) scheduleReload();
                 });
                 evtSource.onerror = () => {
                     if (evtSource) { try { evtSource.close(); } catch {} evtSource = null; }
@@ -1814,6 +2514,9 @@
 
         // --- Init ---
         setView('grid');
+        const initHash = decodeHash();
+        if (initHash) currentPath = initHash;
+        renderBreadcrumb();
         loadFiles();
     </script>
 </body>
